@@ -1,0 +1,38 @@
+[{
+    //i need a blockchain complaint, reporting, and consequence system with proof of fraud
+    "type": "number"/*payload type, request or execute or response or bootstrap or ledger functionality*/,
+    "networkParams": {}/*required, contains fields like max depth and max transaction price*/,
+    "signatures": [{}]/*optional, used to trace, kickback to last signature before content hit to incentivize wise nodes*/,
+    "user": {}/*blockchain declared user information, certified by org, contains identifiers, proof of validity, service payment provider, public keys, etc, manditory for leaving valid footprints on host for proof of good hosting, proof of who's hosting content*/,
+    "query": 
+    {
+        "org": "string" /*optional, org hash(from blockchain)*/,
+        "paths": ["string"]/*optional, directories in tiered content system and function endpoints*/,
+        "contentHash": [{
+            "hash":"string"/*hash of content, required in body of contentHash*/,
+            "chunk":["string"]/*optional*/,
+            "redundancy": [{}]/*optional, , only useful for blind query(no paths or org)*/
+            }]/*optional, hash of content and network query key*/
+
+    }/*required if request, prohibited if response*/,
+    "res": 
+    {
+        "status": "string",
+        "org": "string"/*optional, org hint for cert*/,
+        "cert": "string"/*optional, certification listed on blockchain, tiered and can be invalidated if compromised*/,
+        "content": [{
+            "hash":"string"/*hash of content, required in body of contentHash*/,
+            "chunk":"string"/*optional*/,
+            "redundancy": [{}]/*optional, only useful for blind query(no paths or org)*/
+            }]/*optional, used if host is not using another protcol*/,
+        "proof": {}/*optional, proof of ownership and/or legitimacy, i dont know what will be in here*/
+    }/*required if response, prohibited if request*/,
+    "message": {}/*contains any information from request or response, for examble reference to http url to request*/
+},
+{
+    "codes": ["request","execute","response","bootstrap"]
+},
+{
+    "recipient": "string",
+    "query": {}
+}]
