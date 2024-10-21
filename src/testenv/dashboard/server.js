@@ -8,8 +8,31 @@ const dlnode_1 = require("../../dlnode");
 const monitorlayer_1 = require("../../monitorlayer");
 const path_1 = __importDefault(require("path"));
 const portfinder_1 = __importDefault(require("portfinder"));
-const testEnv = (size = 25, peerCount = 5) => {
-    let dc = size - 1;
+const config = {
+    networkConfig: {
+        labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+        config: {
+            'a': {
+                peers: ['b', 'c']
+            },
+            'b': {
+                peers: ['d', 'e', 'g']
+            },
+            'c': {
+                peers: ['d', 'f', 'g']
+            }
+        }
+    }
+};
+const randomPeers = (size, peerCount) => {
+    nodes.forEach((e, i) => {
+        e.addPeers(Array.from(Array(peerCount)).map((v, i) => {
+            return `ws://localhost:${nodes[Math.floor(Math.random() * size - 0.01)].port}`;
+        }));
+    });
+};
+const testEnv = (size = 25, peerCount = 5, peerSetup = randomPeers) => {
+    let dc = size;
     Array.from(Array(size)).forEach((e, i) => {
         console.log(`pushing server with target port ${3030 + i}`);
         console.log(`index ${i}`);
@@ -17,19 +40,30 @@ const testEnv = (size = 25, peerCount = 5) => {
         nodes[i].deploy().then((p) => {
             console.log(`passed port ${p}`);
             console.log(`depoloying monitor for localhost:${p}`);
-            let peerCount = 5;
             mnodes.push(new monitorlayer_1.DLMonitorLayer(p + 100, nodes[i]));
             dc -= 1;
             if (dc == 0) {
                 console.log(`peers time`);
-                nodes.forEach((e, i) => {
-                    e.addPeers(Array.from(Array(peerCount)).map((v, i) => {
-                        return `ws://localhost:${nodes[Math.floor(Math.random() * size - 0.01)].port}`;
-                    }));
-                });
+                peerSetup(size, peerCount);
             }
         });
     });
+};
+const peerSetupWithConfig = () => {
+    console.log('peerSetupWithConfig');
+    nodes.forEach((e, i) => {
+        if (config.networkConfig.config[config.networkConfig.labels[i]]) {
+            let p = config.networkConfig.config[config.networkConfig.labels[i]].peers;
+            p.forEach((em, ind) => {
+                let n = config.networkConfig.labels.indexOf(em);
+                console.log(`add peer ws://localhost:${nodes[n].port}`);
+                e.addPeer(`ws://localhost:${nodes[n].port}`);
+            });
+        }
+    });
+};
+const testEnvWithConfig = () => {
+    testEnv(config.networkConfig.labels.length, -1, () => peerSetupWithConfig());
 };
 const nodes = [];
 const mnodes = [];
@@ -51,7 +85,8 @@ app.get('/instances', (req, res) => {
         return `ws://localhost:${v.port}`;
     })));
 });
-testEnv();
+testEnvWithConfig();
+//testEnv()
 portfinder_1.default.setBasePort(3000);
 let pf = portfinder_1.default.getPortPromise().then((port) => {
     app.listen(port, () => {

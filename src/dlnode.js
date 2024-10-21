@@ -44,8 +44,8 @@ class DLayerNode {
         err.buildError(rb);
     }
     resolveTicket(message, context) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
             let rb = new dlbuilder_1.DLQueryBuilder();
             let rbb = new dlbuilder_1.DLQueryBuilder();
             if (message.ticket.recipient) {
