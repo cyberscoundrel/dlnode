@@ -5,7 +5,7 @@ import path from 'path'
 import portfinder from 'portfinder'
 const config = {
     networkConfig: {
-        labels: ['a', 'b'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
+        labels: ['a', 'b', 'c'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
         config: {
             'a': {
                 peers: ['b']

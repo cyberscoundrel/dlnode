@@ -10,7 +10,7 @@ const path_1 = __importDefault(require("path"));
 const portfinder_1 = __importDefault(require("portfinder"));
 const config = {
     networkConfig: {
-        labels: ['a', 'b' /*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
+        labels: ['a', 'b', 'c' /*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
         config: {
             'a': {
                 peers: ['b']
