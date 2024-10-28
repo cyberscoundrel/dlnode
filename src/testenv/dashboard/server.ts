@@ -5,9 +5,15 @@ import path from 'path'
 import portfinder from 'portfinder'
 const config = {
     networkConfig: {
-        labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+        labels: ['a', 'b'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
         config: {
             'a': {
+                peers: ['b']
+            },
+            'b': {
+                peers: ['c']
+            }
+            /*'a': {
                 peers: ['b', 'c']
             },
             'b': {
@@ -15,7 +21,25 @@ const config = {
             },
             'c': {
                 peers: ['d', 'f', 'g']
-            }
+            },
+            'd': {
+                peers: ['h', 'i']
+            },
+            'e': {
+                peers: ['i', 'j']
+            },
+            'f': {
+                peers: ['k', 'j']
+            },
+            'g': {
+                peers: ['j', 'd', 'l']
+            },
+            'k': {
+                peers: ['a', 'c']
+            },
+            'i': {
+                peers: ['b', 'd']
+            }*/
         } as any
     }
 }
@@ -52,12 +76,17 @@ const peerSetupWithConfig = () => {
     console.log('peerSetupWithConfig')
     nodes.forEach((e, i) => {
         if(config.networkConfig.config[config.networkConfig.labels[i]]){
-            let p = config.networkConfig.config[config.networkConfig.labels[i]].peers as string[]
-            p.forEach((em, ind) => {
-                let n = config.networkConfig.labels.indexOf(em)
-                console.log(`add peer ws://localhost:${nodes[n].port}`)
-                e.addPeer(`ws://localhost:${nodes[n].port}`)
-            })
+            if(config.networkConfig.config[config.networkConfig.labels[i]].peers){
+                let p = config.networkConfig.config[config.networkConfig.labels[i]].peers as string[]
+                p.forEach((em, ind) => {
+                    let n = config.networkConfig.labels.indexOf(em)
+                    console.log(`add peer ws://localhost:${nodes[n].port}`)
+                    e.addPeer(`ws://localhost:${nodes[n].port}`)
+                })
+            }
+            if(config.networkConfig.config[config.networkConfig.labels[i]].eat){
+                e.eat = true
+            }
         }
     })
 }

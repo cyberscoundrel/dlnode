@@ -8,6 +8,17 @@ const ws_1 = __importDefault(require("ws"));
 const portfinder_1 = __importDefault(require("portfinder"));
 const zodschemas_1 = require("./zodschemas");
 class DLMonitorLayer {
+    replacer(key, value) {
+        if (value instanceof Map) {
+            return {
+                dataType: 'Map',
+                value: Array.from(value.entries()), // or with spread: value: [...value]
+            };
+        }
+        else {
+            return value;
+        }
+    }
     initServer(wss) {
         wss.on('connection', (ws) => {
             ws.on('message', (msg) => {
@@ -16,10 +27,14 @@ class DLMonitorLayer {
                     switch (parsed.type) {
                         case "stat":
                             console.log('stat request');
+                            console.log(JSON.stringify({
+                                type: "stat",
+                                message: Object.assign({}, this.dln.getStat())
+                            }, this.replacer, 3));
                             ws.send(JSON.stringify({
                                 type: "stat",
                                 message: Object.assign({}, this.dln.getStat())
-                            }));
+                            }, this.replacer));
                             break;
                         case "query":
                             try {

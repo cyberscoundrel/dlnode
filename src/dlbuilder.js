@@ -19,14 +19,14 @@ var QueryCodes;
     QueryCodes[QueryCodes["request"] = 0] = "request";
     //execute = 1,
     QueryCodes[QueryCodes["response"] = 2] = "response";
-})(QueryCodes = exports.QueryCodes || (exports.QueryCodes = {}));
+})(QueryCodes || (exports.QueryCodes = QueryCodes = {}));
 var ResponseCodes;
 (function (ResponseCodes) {
     ResponseCodes[ResponseCodes["nosend"] = -1] = "nosend";
     ResponseCodes[ResponseCodes["hit"] = 0] = "hit";
     ResponseCodes[ResponseCodes["ticket"] = 1] = "ticket";
     ResponseCodes[ResponseCodes["error"] = 2] = "error";
-})(ResponseCodes = exports.ResponseCodes || (exports.ResponseCodes = {}));
+})(ResponseCodes || (exports.ResponseCodes = ResponseCodes = {}));
 var ErrorCodes;
 (function (ErrorCodes) {
     ErrorCodes[ErrorCodes["genericError"] = -1] = "genericError";
@@ -34,7 +34,7 @@ var ErrorCodes;
     ErrorCodes[ErrorCodes["invalidResponse"] = 1] = "invalidResponse";
     ErrorCodes[ErrorCodes["generationError"] = 2] = "generationError";
     ErrorCodes[ErrorCodes["internalError"] = 3] = "internalError";
-})(ErrorCodes = exports.ErrorCodes || (exports.ErrorCodes = {}));
+})(ErrorCodes || (exports.ErrorCodes = ErrorCodes = {}));
 class DLNodeErrorBase extends Error {
     constructor(msg) {
         super(msg);
@@ -58,7 +58,7 @@ exports.DLQueryBuilderError = DLQueryBuilderError;
 var InternalError;
 (function (InternalError) {
     InternalError[InternalError["ticketCreation"] = 0] = "ticketCreation";
-})(InternalError = exports.InternalError || (exports.InternalError = {}));
+})(InternalError || (exports.InternalError = InternalError = {}));
 class DLInternalError extends DLNodeErrorBase {
     constructor(msg, txt, errCode, tkt, context) {
         super(msg);
@@ -121,6 +121,16 @@ class DLQueryBuilder {
     getTicket() {
         return __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").ticket;
     }
+    _generateNoValidate() {
+        let newQuery = {
+            type: __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").type,
+            req: __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").req,
+            res: __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").res,
+            ticket: __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").ticket,
+            message: __classPrivateFieldGet(this, _DLQueryBuilder_partial, "f").message
+        };
+        return newQuery;
+    }
     generate() {
         try {
             DLQueryBuilder.validate(__classPrivateFieldGet(this, _DLQueryBuilder_partial, "f"));
@@ -143,6 +153,9 @@ class DLQueryBuilder {
         return newQuery;
     }
     static validate(dlq, code = ErrorCodes.generationError) {
+        if (dlq.type == QueryCodes.nosend) {
+            return;
+        }
         if (dlq.req || dlq.res) {
             if (dlq.message) {
                 switch (dlq.type) {
@@ -166,17 +179,19 @@ class DLQueryBuilder {
                         break;
                     case QueryCodes.response:
                         if (dlq.res) {
-                            if (dlq.res.status) {
+                            if (dlq.res.status != undefined) {
                                 if (dlq.ticket && dlq.ticket.txn) {
                                     switch (dlq.res.status) {
                                         case ResponseCodes.hit:
                                             if (dlq.ticket.txn == "000") {
                                                 throw new DLQueryBuilderError("no txn provided for hit", "no txn provided for hit", code);
                                             }
+                                            break;
                                         case ResponseCodes.error:
                                             if (!dlq.message.error) {
                                                 throw new DLQueryBuilderError("no error code provided for error response", "no error code provided for error response", code);
                                             }
+                                            break;
                                     }
                                 }
                                 else {

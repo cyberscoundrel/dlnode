@@ -8,6 +8,14 @@ export class DLMonitorLayerClient{
     handleContent: (m: any) => void = (m: any) => {}
     handleStat: (m: any) => void = (m: any) => {}
     openHook: () => any = () => {}
+    reviver(key: string, value: any) {
+        if(typeof value === 'object' && value !== null) {
+          if (value.dataType === 'Map') {
+            return new Map(value.value);
+          }
+        }
+        return value;
+    }
     initClient(ws: WebSocket): WebSocket {
         //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {

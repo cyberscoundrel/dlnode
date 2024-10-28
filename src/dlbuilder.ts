@@ -131,6 +131,16 @@ export class DLQueryBuilder {
     getTicket() {
         return this.#partial.ticket
     }
+    _generateNoValidate(): DLQuery{
+        let newQuery: DLQuery = {
+            type: this.#partial.type!,
+            req: this.#partial.req,
+            res: this.#partial.res,
+            ticket: this.#partial.ticket!,
+            message: this.#partial.message!
+        }
+        return newQuery
+    }
     generate(): DLQuery{
         try{
             DLQueryBuilder.validate(this.#partial)
@@ -151,6 +161,9 @@ export class DLQueryBuilder {
         return newQuery
     }
     static validate(dlq: Partial<DLQuery>, code: ErrorCodes = ErrorCodes.generationError){
+        if(dlq.type == QueryCodes.nosend){
+            return
+        }
         if(dlq.req || dlq.res){
             if(dlq.message){
                 switch(dlq.type) {
@@ -173,7 +186,7 @@ export class DLQueryBuilder {
                         break
                     case QueryCodes.response:
                         if(dlq.res){
-                            if(dlq.res.status){
+                            if(dlq.res.status != undefined){
                                 
                                 if(dlq.ticket && dlq.ticket.txn){
                                     switch(dlq.res.status){
@@ -181,10 +194,12 @@ export class DLQueryBuilder {
                                             if(dlq.ticket.txn == "000"){
                                                 throw new DLQueryBuilderError("no txn provided for hit", "no txn provided for hit", code)
                                             }
+                                            break
                                         case ResponseCodes.error:
                                             if(!dlq.message.error){
                                                 throw new DLQueryBuilderError("no error code provided for error response", "no error code provided for error response", code)
                                             }
+                                            break
                                     }
                                     
                                 }else{

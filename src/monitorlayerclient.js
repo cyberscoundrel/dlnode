@@ -3,6 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DLMonitorLayerClient = void 0;
 const zodschemas_1 = require("./zodschemas");
 class DLMonitorLayerClient {
+    reviver(key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (value.dataType === 'Map') {
+                return new Map(value.value);
+            }
+        }
+        return value;
+    }
     initClient(ws) {
         //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {

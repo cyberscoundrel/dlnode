@@ -38919,6 +38919,16 @@ var DLMonitorLayerClient = /*#__PURE__*/function () {
     this.socket = this.initClient(new WebSocket(this.url));
   }
   return _createClass(DLMonitorLayerClient, [{
+    key: "reviver",
+    value: function reviver(key, value) {
+      if (_typeof(value) === 'object' && value !== null) {
+        if (value.dataType === 'Map') {
+          return new Map(value.value);
+        }
+      }
+      return value;
+    }
+  }, {
     key: "initClient",
     value: function initClient(ws) {
       var _this = this;
@@ -39120,6 +39130,7 @@ function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArra
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -39253,6 +39264,24 @@ var InnerNode = function InnerNode(props) {
       //setLog(log + m)
       
   }*/
+  function reviver(key, value) {
+    if (_typeof(value) === 'object' && value !== null) {
+      if (value.dataType === 'Map') {
+        return new Map(value.value);
+      }
+    }
+    return value;
+  }
+  /*function replacer(key: string, value: any) {
+      if(value instanceof Map) {
+        return {
+          dataType: 'Map',
+          value: Array.from(value.entries()), // or with spread: value: [...value]
+        };
+      } else {
+        return value;
+      }
+  }*/
   React.useEffect(function () {
     console.log('setting hooks');
     props.node.handleContent = function (m) {
@@ -39265,7 +39294,7 @@ var InnerNode = function InnerNode(props) {
     props.node.handleStat = function (m) {
       //console.log('set stat')
       //console.log(m)
-      setStat(stat + JSON.stringify(m, null, 3));
+      //setStat(stat + JSON.stringify(m, null, 3))
       setOStat(m);
       //setLog(log + m)
     };
@@ -39348,14 +39377,23 @@ var InnerNode = function InnerNode(props) {
     console.log(stat);
     if (ostat) {
       var ost = ostat;
-      if (ost && log == '') {
-        setLog(ost.log);
+      setStat(JSON.stringify(ostat, null, 3));
+      setLog(ost.log);
+      setCont(ost.content);
+      //let ca: ContentType[] = []
+      setContents(ost.contentMap.value.map(function (v, i) {
+        return {
+          name: v[0]
+        };
+      }));
+      /*if(ost && log == '') {
+          setLog(ost.log)
       }
-      if (ost && content == '') {
-        setCont(ost.content);
-      }
+      if(ost && content == '') {
+          setCont(ost.content)
+      }*/
     }
-  }, [stat, ostat]);
+  }, [ostat]);
   React.useEffect(function () {
     //console.log(`oldstate ${oldNode.current?.url}`)
     console.log("new ".concat(props.node.url));

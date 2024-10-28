@@ -89,6 +89,25 @@ const InnerNode = (props: InnerNodePropType) => {
         //setLog(log + m)
         
     }*/
+    function reviver(key: string, value: any) {
+        if(typeof value === 'object' && value !== null) {
+            if (value.dataType === 'Map') {
+            return new Map(value.value);
+            }
+        }
+        return value;
+    }
+    /*function replacer(key: string, value: any) {
+        if(value instanceof Map) {
+          return {
+            dataType: 'Map',
+            value: Array.from(value.entries()), // or with spread: value: [...value]
+          };
+        } else {
+          return value;
+        }
+    }*/
+   
     React.useEffect(() => {
         console.log('setting hooks')
         props.node.handleContent = (m: any) => {
@@ -101,7 +120,7 @@ const InnerNode = (props: InnerNodePropType) => {
         props.node.handleStat = (m: any) => {
             //console.log('set stat')
             //console.log(m)
-            setStat(stat + JSON.stringify(m, null, 3))
+            //setStat(stat + JSON.stringify(m, null, 3))
             setOStat(m)
             //setLog(log + m)
             
@@ -195,16 +214,30 @@ const InnerNode = (props: InnerNodePropType) => {
             let ost = ostat as unknown & { 
                 log: string 
                 content: string
+                contentMap: {
+                    dataType: string,
+                    value: string[][]
+                }
             }
-            if(ost && log == '') {
+            setStat(JSON.stringify(ostat, null, 3))
+            setLog(ost.log)
+            setCont(ost.content)
+            //let ca: ContentType[] = []
+            
+            setContents(ost.contentMap.value.map((v, i) => {
+                return {
+                    name: v[0]
+                }
+            }))
+            /*if(ost && log == '') {
                 setLog(ost.log)
             }
             if(ost && content == '') {
                 setCont(ost.content)
-            }
+            }*/
         }
             
-    }, [stat, ostat])
+    }, [ostat])
     React.useEffect(() => {
         //console.log(`oldstate ${oldNode.current?.url}`)
         console.log(`new ${props.node.url}`)

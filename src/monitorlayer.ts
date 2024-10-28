@@ -8,6 +8,16 @@ export class DLMonitorLayer{
     dln: DLayerNode
     wss?: WebSocketServer
     port: number
+    replacer(key: any, value: any) {
+        if(value instanceof Map) {
+          return {
+            dataType: 'Map',
+            value: Array.from(value.entries()), // or with spread: value: [...value]
+          };
+        } else {
+          return value;
+        }
+    }
     initServer(wss: WebSocketServer): WebSocketServer{
         wss.on('connection', (ws) => {
             ws.on('message', (msg) => {
@@ -16,12 +26,18 @@ export class DLMonitorLayer{
                     switch(parsed.type){
                         case "stat": 
                             console.log('stat request')
+                            console.log(JSON.stringify({
+                                type: "stat",
+                                message: {
+                                    ...this.dln.getStat()
+                                }
+                            },this.replacer,3))
                             ws.send(JSON.stringify({
                                 type: "stat",
                                 message: {
                                     ...this.dln.getStat()
                                 }
-                            }))
+                            },this.replacer))
                             break
                         case "query": 
                             try{

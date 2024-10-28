@@ -29,14 +29,23 @@ class DLayerNode {
     }
     hash(cont) {
         let sha = crypto_1.default.createHash('sha256');
-        sha.update(JSON.stringify(cont));
+        sha.update('' + cont);
         return sha.digest('hex');
     }
     filterSend(rb, context, rules) {
-        let outbound = rb.generate();
-        if (!(outbound.type === dlbuilder_1.QueryCodes.nosend || (outbound.res && outbound.res.status == dlbuilder_1.ResponseCodes.nosend))) {
-            //generate before conditional
-            context.reply(JSON.stringify(outbound));
+        if (true) {
+            let pre = rb._generateNoValidate();
+            let outbound = rb.generate();
+            this.logger(`sending message back to ${context.socket}: ${JSON.stringify(outbound, null, 2)}`);
+            this.logger(`from ${JSON.stringify(pre)}`);
+            if (!(outbound.type === dlbuilder_1.QueryCodes.nosend || (outbound.res && (outbound.res.status == dlbuilder_1.ResponseCodes.nosend || outbound.res.status == dlbuilder_1.ResponseCodes.error)))) {
+                this.logger(`message sent`);
+                //generate before conditional
+                context.reply(JSON.stringify(outbound));
+            }
+            else {
+                this.logger(`message caught`);
+            }
         }
     }
     handleDLNodeError(err, rb) {
@@ -44,8 +53,8 @@ class DLayerNode {
         err.buildError(rb);
     }
     resolveTicket(message, context) {
-        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             let rb = new dlbuilder_1.DLQueryBuilder();
             let rbb = new dlbuilder_1.DLQueryBuilder();
             if (message.ticket.recipient) {
@@ -53,7 +62,7 @@ class DLayerNode {
                     if ((_a = this.tickets.get(message.ticket.recipient)) === null || _a === void 0 ? void 0 : _a.has(message.ticket.txn)) {
                         rb.DLNoSend("ticket resolved");
                         (_c = (_b = this.resolved.get(message.ticket.recipient)) === null || _b === void 0 ? void 0 : _b.get(message.ticket.txn)) === null || _c === void 0 ? void 0 : _c.push(Object.assign(Object.assign({}, this.tickets.get(message.ticket.recipient).get(message.ticket.txn)), { response: message.res }));
-                        let newReq = this.tickets.get(message.ticket.recipient).get(message.ticket.txn).request;
+                        let newReq = Object.assign({}, this.tickets.get(message.ticket.recipient).get(message.ticket.txn).request);
                         newReq.hops -= 1;
                         rbb.from(message).setTicket(this.tickets.get(message.ticket.recipient).get(message.ticket.txn).ticket).setReq(newReq);
                         this.filterSend(rbb, {
@@ -76,6 +85,7 @@ class DLayerNode {
     }
     resolveResponse(message, rb, context) {
         let ticket = message.ticket;
+        this.logger(`resolve response`);
         switch (message.res.status) {
             case dlbuilder_1.ResponseCodes.hit:
                 this.resolveTicket(message, context).catch((err) => {
@@ -86,6 +96,9 @@ class DLayerNode {
                     }
                 });
                 rb.DLNoSend(`received hit from peer`);
+                break;
+            default:
+                this.logger(`received response from ${context.socket}: ${JSON.stringify(message, null, 2)}`);
         }
     }
     resolveError(message, rb, context) {
@@ -97,12 +110,17 @@ class DLayerNode {
         this.logger(`received request ${JSON.stringify(message)}`);
         rb.setType(dlbuilder_1.QueryCodes.response);
         if (this.contentHit(message.req.contentHash.hash)) {
+            this.logger(`content hit: ${this.contentMap.get(message.req.contentHash.hash)}`);
             rb.setRes({
                 status: dlbuilder_1.ResponseCodes.hit,
-                content: this.maps[message.type].get((message.req.contentHash.hash))
-            });
+                content: [{
+                        content: this.maps[message.type].get((message.req.contentHash.hash))
+                    }]
+            }).setMessage({}).setReq(message.req);
+            this.logger(`rb ${JSON.stringify(rb._generateNoValidate(), null, 3)}`);
         }
         else {
+            this.logger(`no hit, peer query`);
             this.queryPeers(message, this.createTicket(message, rb, context), context).catch((err) => {
                 if (err instanceof dlbuilder_1.DLNodeErrorBase) {
                     let rbb = new dlbuilder_1.DLQueryBuilder();
@@ -115,7 +133,7 @@ class DLayerNode {
     dlayer(req, rb, context) {
         var _a, _b;
         //console.log(`dlayer ${req}`)
-        this.logger(`dlayer ${req}`);
+        this.logger(`dlayer ${JSON.stringify(req, null, 2)}`);
         dlbuilder_1.DLQueryBuilder.validate(req);
         //console.log(`validated request`)
         this.logger(`validated request`);
@@ -126,6 +144,7 @@ class DLayerNode {
                     this.resolveRequest(req, rb, context);
                 }
                 else {
+                    this.logger(`overhopped`);
                     rb.DLNoSend();
                 }
                 break;
@@ -134,6 +153,7 @@ class DLayerNode {
                     this.resolveResponse(req, rb, context);
                 }
                 else {
+                    this.logger(`overhopped`);
                     rb.DLNoSend();
                 }
                 break;
@@ -141,35 +161,57 @@ class DLayerNode {
         //return rb.generate()
         //hash of enpoint code on blockchain
     }
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     queryPeers(req, newTicket, context) {
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            this.logger(`querying peers for query ${JSON.stringify(req, null, 2)}`);
             //let data = undefined
+            yield this.sleep(1000);
+            this.logger(`querying peers for socket ${context.socket}:`);
+            this.logger(`original query req ${JSON.stringify(req.req, null, 2)}`);
             let qb = new dlbuilder_1.DLQueryBuilder();
-            let newReq = req.req;
-            newReq.hops += 1;
+            let newReq = {
+                contentHash: (_a = req.req) === null || _a === void 0 ? void 0 : _a.contentHash,
+                hops: ((_b = req.req) === null || _b === void 0 ? void 0 : _b.hops) + 1
+            };
             qb.from(req).setTicket(newTicket).setReq(newReq);
             let generated = qb.generate();
             this.sockets.forEach((v, k) => {
-                v(JSON.stringify(generated));
+                if (k !== context.socket) {
+                    v(JSON.stringify(generated));
+                }
             });
         });
     }
     createTicket(req, rb, context) {
+        var _a;
         //console.log(`ticket creation for ${JSON.stringify(req)}`)
-        this.logger(`ticket creation for ${JSON.stringify(req)}`);
+        this.logger(`ticket creation for ${JSON.stringify(req, null, 2)}`);
         if (context.socket) {
             let hsh1 = context.socket;
             if (req.req) {
-                let newReq = req.req;
+                let newReq = Object.assign({}, req.req);
                 newReq.hops = 0;
                 let hsh0 = this.hash(newReq);
+                newReq.hops = req.req.hops;
                 if (this.sockets.has(hsh1) && this.tickets.has(hsh1) && this.resolved.has(hsh1)) {
                     if (this.sockets.get(hsh1) && this.tickets.get(hsh1) && this.resolved.get(hsh1)) {
+                        //create ticket
+                        (_a = this.tickets.get(hsh1)) === null || _a === void 0 ? void 0 : _a.set(hsh0, {
+                            request: newReq,
+                            ticket: {
+                                txn: hsh0,
+                                recipient: hsh1
+                            }
+                        });
                         rb.setRes({
                             status: dlbuilder_1.ResponseCodes.ticket
                         }).setMessage({
                             text: "ticket created"
-                        }).setType(dlbuilder_1.QueryCodes.nosend);
+                        }).setType(dlbuilder_1.QueryCodes.response).setReq(newReq);
                         return {
                             txn: hsh0,
                             recipient: hsh1
@@ -209,10 +251,10 @@ class DLayerNode {
             };
             try {
                 //console.log(`received message ${msg}`)
-                this.logger(`received message ${msg}`);
+                this.logger(`received message from ${remoteAddress}: ${msg.toString()}`);
                 let dmsg = zodschemas_1.DLQueryZ.parse(JSON.parse(msg.toString()));
                 //console.log(dmsg)
-                this.logger(dmsg);
+                //this.logger(dmsg)
                 this.dlayer(dmsg, qb, context);
             }
             catch (err) {
@@ -229,6 +271,7 @@ class DLayerNode {
                     qb.DLError(dlbuilder_1.ErrorCodes.internalError, "zod validation error: message does not meet schema requirements", dlbuilder_1.DLQueryBuilder.NoTicket);
                 }
             }
+            this.logger(`end of dlayer`);
             this.filterSend(qb, context);
         });
         ws.on('close', () => {
@@ -292,6 +335,8 @@ class DLayerNode {
         });
     }
     requestContent(contentHash) {
+        var _a;
+        this.logger(`request for content hash ${contentHash}`);
         let rb = new dlbuilder_1.DLQueryBuilder();
         let newRequest = {
             contentHash: {
@@ -304,6 +349,10 @@ class DLayerNode {
             txn: this.hash(newRequest)
         };
         rb.setType(dlbuilder_1.QueryCodes.request).setReq(newRequest).setMessage({}).setTicket(newTicket);
+        (_a = this.tickets.get(this.hash(this.secret))) === null || _a === void 0 ? void 0 : _a.set(this.hash(newRequest), {
+            request: newRequest,
+            ticket: newTicket
+        });
         this.queryPeers(rb.generate(), newTicket, {
             reply: this.sockets.get(this.hash(this.secret))
         });
@@ -339,7 +388,7 @@ class DLayerNode {
     logger(m) {
         this.logHooks.forEach((e, i) => {
             //console.log(`calling log hook ${i}`)
-            e(m);
+            e(`[localhost:${this.port}]  ` + m);
         });
     }
     logHook(hook) {
@@ -347,7 +396,7 @@ class DLayerNode {
     }
     onContent(m) {
         this.contentHooks.forEach((e, i) => {
-            e(m);
+            e(`[localhost:${this.port}]  ` + m);
         });
     }
     contentHook(hook) {
@@ -360,6 +409,7 @@ class DLayerNode {
         this.endpointMap = new Map();
         this.maps = [this.contentMap, this.functionMap, this.endpointMap];
         this.peers = [];
+        this.eat = false;
         this.logHooks = [];
         this.contentHooks = [];
         //sha: crypto.Hash = crypto.createHash('sha256')
