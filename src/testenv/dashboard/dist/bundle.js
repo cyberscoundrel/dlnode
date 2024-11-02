@@ -38929,6 +38929,14 @@ var DLMonitorLayerClient = /*#__PURE__*/function () {
       return value;
     }
   }, {
+    key: "replacer",
+    value: function replacer(key, value) {
+      if (key === 'log' || key === 'content' || key === 'debug') {
+        return undefined;
+      }
+      return value;
+    }
+  }, {
     key: "initClient",
     value: function initClient(ws) {
       var _this = this;
@@ -38946,7 +38954,7 @@ var DLMonitorLayerClient = /*#__PURE__*/function () {
               break;
             case "stat":
               console.log('stat received');
-              console.log(JSON.stringify(parsed.message, null, 3));
+              console.log(JSON.stringify(parsed.message, _this.replacer, 3));
               _this.handleStat(parsed.message);
               break;
           }
@@ -39372,12 +39380,18 @@ var InnerNode = function InnerNode(props) {
       }
       getStat()
   }, [])*/
+  var statreplacer = function statreplacer(key, value) {
+    if (key === 'log' || key === 'content' || key === 'debug') {
+      return undefined;
+    }
+    return value;
+  };
   React.useEffect(function () {
     console.log('stat change');
     console.log(stat);
     if (ostat) {
       var ost = ostat;
-      setStat(JSON.stringify(ostat, null, 3));
+      setStat(JSON.stringify(ostat, statreplacer, 3));
       setLog(ost.log);
       setCont(ost.content);
       //let ca: ContentType[] = []

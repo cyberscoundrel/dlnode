@@ -207,6 +207,12 @@ const InnerNode = (props: InnerNodePropType) => {
         }
         getStat()
     }, [])*/
+    const statreplacer = (key: string, value: any) => {
+        if(key === 'log' || key === 'content' || key === 'debug') {
+            return undefined
+        }
+        return value
+    }
     React.useEffect(() => {
         console.log('stat change')
         console.log(stat)
@@ -219,7 +225,7 @@ const InnerNode = (props: InnerNodePropType) => {
                     value: string[][]
                 }
             }
-            setStat(JSON.stringify(ostat, null, 3))
+            setStat(JSON.stringify(ostat, statreplacer, 3))
             setLog(ost.log)
             setCont(ost.content)
             //let ca: ContentType[] = []

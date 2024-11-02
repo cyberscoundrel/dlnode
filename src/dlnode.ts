@@ -51,6 +51,8 @@ export class DLayerNode {
     //logReadable: stream.Readable = new stream.Readable()
     content: string = ""
     //contentReadable: stream.Readable = new stream.Readable()
+    debug: string = ""
+    outputDebug: boolean = true
     contentHit(hash: string) {
         return this.contentMap.has(hash)
     }
@@ -63,7 +65,7 @@ export class DLayerNode {
         if(true){
             let pre = rb._generateNoValidate()
             let outbound = rb.generate()
-            this.logger(`sending message back to ${context.socket}: ${JSON.stringify(outbound, null, 2)}`)
+            this.logger(`sending message back to ${context.socketID}/${context.socket}: ${JSON.stringify(outbound, null, 2)}`)
             this.logger(`from ${JSON.stringify(pre)}`)
             if(!(outbound.type === QueryCodes.nosend || (outbound.res && (outbound.res.status == ResponseCodes.nosend || outbound.res.status == ResponseCodes.error)))) {
                 this.logger(`message sent`)
@@ -90,12 +92,17 @@ export class DLayerNode {
                         response: message.res!
                     })
                     let newReq = {...this.tickets.get(message.ticket.recipient!)!.get(message.ticket.txn)!.request}
+                    this.logger(`ticket resolve old hops ${newReq.hops}`)
                     newReq.hops -= 1
-                    rbb.from(message).setTicket(this.tickets.get(message.ticket.recipient!)!.get(message.ticket.txn)!.ticket).setReq(newReq)
+                    this.logger(`ticket resolve new hops ${newReq.hops}`)
+                    rbb.from(message).setTicket(this.tickets.get(message.ticket.recipient!)!.get(message.ticket.txn)!.ticket).setReq(newReq).setType(QueryCodes.response)
                     this.filterSend(rbb, {
+                        socket: message.ticket.recipient!,
                         reply: this.sockets.get(message.ticket.recipient)!
                     })
                     this.filterSend(rb, context)
+                    //prove malicous peer as opposed to proof of valid response
+                    //add fields in protocol to provide fingerprint for network reporting purposes
 
                 }else{
                     throw new DLQueryBuilderError("txn does not exist for recipient", "txn does not exist for recipient", ErrorCodes.invalidResponse, context, message.ticket)
@@ -125,7 +132,7 @@ export class DLayerNode {
                 rb.DLNoSend(`received hit from peer`)
                 break
             default: 
-                this.logger(`received response from ${context.socket}: ${JSON.stringify(message, null, 2)}`)
+                this.logger(`received response from ${context.socketID}: ${JSON.stringify(message, null, 2)}`)
         }
     }
     resolveError(message: DLQuery, rb: DLQueryBuilder, context: DLQueryContext) {
@@ -175,15 +182,16 @@ export class DLayerNode {
                 if(req.req?.hops && req.req.hops < 3){
                     this.resolveRequest(req, rb, context)
                 }else{
-                    this.logger(`overhopped`)
+                    this.logger(`overhopped ${req.req?.hops != undefined ? 'true' : 'false'} && ${req.req!.hops! < 3 ? 'true' : 'false'}`)
                     rb.DLNoSend()
                 }
                 break
             case QueryCodes.response : 
-                if(req.req?.hops && req.req.hops > 0){
+                if(req.req?.hops != undefined && req.req.hops > -1){
+                    this.logger(`pls resolve response`)
                     this.resolveResponse(req, rb, context)
                 }else{
-                    this.logger(`overhopped`)
+                    this.logger(`overhopped ${req.req?.hops != undefined ? 'true' : 'false'} && ${req.req!.hops! > -1 ? 'true' : 'false'}`)
                     rb.DLNoSend()
                 }
                 break
@@ -198,7 +206,7 @@ export class DLayerNode {
         this.logger(`querying peers for query ${JSON.stringify(req, null, 2)}`)
         //let data = undefined
         await this.sleep(1000)
-        this.logger(`querying peers for socket ${context.socket}:`)
+        this.logger(`querying peers for socket ${context.socketID}:`)
         this.logger(`original query req ${JSON.stringify(req.req, null, 2)}`)
         let qb = new DLQueryBuilder()
         
@@ -210,7 +218,7 @@ export class DLayerNode {
         qb.from(req).setTicket(newTicket).setReq(newReq)
         let generated = qb.generate()
         this.sockets.forEach((v, k) => {
-            if(k !== context.socket){
+            if(k !== context.socketID){
                 v(JSON.stringify(generated))
             }
         })
@@ -219,8 +227,8 @@ export class DLayerNode {
         //console.log(`ticket creation for ${JSON.stringify(req)}`)
         this.logger(`ticket creation for ${JSON.stringify(req, null, 2)}`)
         
-        if(context.socket){
-            let hsh1 = context.socket
+        if(context.socketID){
+            let hsh1 = context.socketID
             if(req.req){
                 let newReq = { ...req.req}
                 newReq.hops = 0
@@ -232,8 +240,8 @@ export class DLayerNode {
                         this.tickets.get(hsh1)?.set(hsh0, {
                             request: newReq,
                             ticket: {
-                                txn: hsh0,
-                                recipient: hsh1
+                                txn: req.ticket.txn,
+                                recipient: req.ticket.recipient
                             }
                         })
                         rb.setRes({
@@ -282,12 +290,15 @@ export class DLayerNode {
             let qb: DLQueryBuilder = new DLQueryBuilder()
             let context = {
                 reply:(m: any) => ws.send(m),
-                socket: this.hash(remoteAddress)
+                socketID: this.hash(remoteAddress),
+                socket: remoteAddress
             }
             try{
                 //console.log(`received message ${msg}`)
                 this.logger(`received message from ${remoteAddress}: ${msg.toString()}`)
+                let prsed = JSON.parse(msg.toString())
                 let dmsg = DLQueryZ.parse(JSON.parse(msg.toString()))
+                this.logger(`psd content ${JSON.stringify(prsed, null, 2)}`)
                 //console.log(dmsg)
                 //this.logger(dmsg)
                 this.dlayer(dmsg, qb, context)
@@ -392,7 +403,9 @@ export class DLayerNode {
             ticket: newTicket
         })
         this.queryPeers(rb.generate(), newTicket, {
-            reply: this.sockets.get(this.hash(this.secret))!
+            reply: this.sockets.get(this.hash(this.secret))!,
+            socketID: this.hash(this.secret),
+            socket: this.secret
         })
     }
     addPeer(peer: string){
@@ -424,11 +437,16 @@ export class DLayerNode {
         //this.updateSessions()
 
     }
-    logger(m: any) {
-        this.logHooks.forEach((e, i) => {
-            //console.log(`calling log hook ${i}`)
-            e(`[localhost:${this.port}]  ` + m)
-        })
+    logger(m: any, level: number = 0) {
+        if(this.outputDebug || level == 0) {
+            this.logHooks.forEach((e, i) => {
+                //console.log(`calling log hook ${i}`)
+                e(`[localhost:${this.port}]  ` + m)
+            })
+        }
+        if(level == 1){
+            this.debug = `[localhost:${this.port}]  ` + m
+        }
     }
     logHook(hook: (m: any) => void){
         this.logHooks.push(hook)

@@ -27,7 +27,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Node = exports.TextArea = void 0;
-exports.default = ContentList;
 const React = __importStar(require("react"));
 const react_router_dom_1 = require("react-router-dom");
 const crypto_js_1 = __importDefault(require("crypto-js"));
@@ -47,6 +46,7 @@ function ContentList(props) {
         </ul>
       </div>);
 }
+exports.default = ContentList;
 const TextArea = (props) => {
     return (<div>
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{props.label}</label>
@@ -189,12 +189,18 @@ const InnerNode = (props) => {
         }
         getStat()
     }, [])*/
+    const statreplacer = (key, value) => {
+        if (key === 'log' || key === 'content' || key === 'debug') {
+            return undefined;
+        }
+        return value;
+    };
     React.useEffect(() => {
         console.log('stat change');
         console.log(stat);
         if (ostat) {
             let ost = ostat;
-            setStat(JSON.stringify(ostat, null, 3));
+            setStat(JSON.stringify(ostat, statreplacer, 3));
             setLog(ost.log);
             setCont(ost.content);
             //let ca: ContentType[] = []

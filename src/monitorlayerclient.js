@@ -11,6 +11,12 @@ class DLMonitorLayerClient {
         }
         return value;
     }
+    replacer(key, value) {
+        if (key === 'log' || key === 'content' || key === 'debug') {
+            return undefined;
+        }
+        return value;
+    }
     initClient(ws) {
         //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {
@@ -26,7 +32,7 @@ class DLMonitorLayerClient {
                         break;
                     case "stat":
                         console.log('stat received');
-                        console.log(JSON.stringify(parsed.message, null, 3));
+                        console.log(JSON.stringify(parsed.message, this.replacer, 3));
                         this.handleStat(parsed.message);
                         break;
                 }

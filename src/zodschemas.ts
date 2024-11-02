@@ -8,7 +8,7 @@ export const DLRequestZ = z.object({
 })
 export const DLResponseZ = z.object({
     status: z.number(),
-    content: z.optional(z.array(z.object({})))
+    content: z.optional(z.array(z.any()))
 })
 export const DLQueryTicketZ = z.object({
     txn: z.string(),

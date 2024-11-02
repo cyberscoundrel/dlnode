@@ -56,6 +56,7 @@ export class DLQueryBuilderError extends DLNodeErrorBase{
 }
 export type DLQueryContext = {
     reply: (m: any) => void
+    socketID?: string
     socket?: string
 }
 export enum InternalError {

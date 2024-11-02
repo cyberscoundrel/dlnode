@@ -10,7 +10,7 @@ exports.DLRequestZ = zod_1.z.object({
 });
 exports.DLResponseZ = zod_1.z.object({
     status: zod_1.z.number(),
-    content: zod_1.z.optional(zod_1.z.array(zod_1.z.object({})))
+    content: zod_1.z.optional(zod_1.z.array(zod_1.z.any()))
 });
 exports.DLQueryTicketZ = zod_1.z.object({
     txn: zod_1.z.string(),
