@@ -1,17 +1,24 @@
 import express from 'express'
-import { DLayerNode } from '../../dlnode'
+import webpackDevMiddleware from 'webpack-dev-middleware'
+import webpackHotMiddleware from 'webpack-hot-middleware'
+import { DLayerNode } from '../../node'
 import { DLMonitorLayer } from '../../monitorlayer'
 import path from 'path'
 import portfinder from 'portfinder'
+import webpack from 'webpack'
+const webpackConfig = require('../../../webpack.config.js');
 const config = {
     networkConfig: {
-        labels: ['a', 'b', 'c'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
+        labels: ['a', 'b', 'c', 'd', 'e'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
         config: {
             'a': {
-                peers: ['b']
+                peers: ['b', 'e']
             },
             'b': {
-                peers: ['c']
+                peers: ['c', 'd']
+            },
+            'd': {
+                peers: ['a']
             }
             /*'a': {
                 peers: ['b', 'c']
@@ -46,7 +53,7 @@ const config = {
 
 const randomPeers = (size: number, peerCount: number) => {
     nodes.forEach((e, i) => {
-        e.addPeers(Array.from(Array(peerCount)).map((v, i) => {
+        e.connectWS(Array.from(Array(peerCount)).map((v, i) => {
             return `ws://localhost:${nodes[Math.floor(Math.random() * size - 0.01)].port}`
         }))
 
@@ -81,7 +88,7 @@ const peerSetupWithConfig = () => {
                 p.forEach((em, ind) => {
                     let n = config.networkConfig.labels.indexOf(em)
                     console.log(`add peer ws://localhost:${nodes[n].port}`)
-                    e.addPeer(`ws://localhost:${nodes[n].port}`)
+                    e.connectWS([`ws://localhost:${nodes[n].port}`])
                 })
             }
             if(config.networkConfig.config[config.networkConfig.labels[i]].eat){
@@ -97,7 +104,15 @@ const nodes: DLayerNode[] = []
 const mnodes: DLMonitorLayer[] = []
 const app = express()
 
-app.get('/', (req, res) => {
+const compiler = webpack(webpackConfig);
+
+app.use(webpackDevMiddleware(compiler, {
+  publicPath: webpackConfig.output.publicPath,
+}));
+
+app.use(webpackHotMiddleware(compiler));
+
+/*app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 app.get('/bundle.js', (req, res) => {
@@ -108,7 +123,7 @@ app.get('/bundle.js.map', (req, res) => {
 })
 app.get('/output.css', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'output.css'))
-})
+})*/
 app.get('/instances', (req, res) => {
     res.send(JSON.stringify(mnodes.map((v, i) => {
         return `ws://localhost:${v.port}`
@@ -122,4 +137,8 @@ let pf = portfinder.getPortPromise().then((port) => {
         console.log(`dashboard backend listening on ${port}`)
     })
 })
+
+/*function webpack(webpackConfig: any) {
+    throw new Error('Function not implemented.')
+}*/
 

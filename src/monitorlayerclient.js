@@ -52,6 +52,7 @@ class DLMonitorLayerClient {
         this.handleStat = (m) => { };
         this.openHook = () => { };
         this.url = url;
+        console.log(`connecting to ${url}`);
         this.socket = this.initClient(new WebSocket(this.url));
     }
 }

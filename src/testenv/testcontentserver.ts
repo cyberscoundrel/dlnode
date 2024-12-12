@@ -4,11 +4,11 @@ import path from 'path'
 import crypto from 'crypto'
 import portfinder from 'portfinder'
 import expressWs from 'express-ws';
-import WebSocket, { WebSocketServer } from 'ws';
-import { DLayerNode } from "../dlnode";
+//import WebSocket, { WebSocketServer } from 'ws';
+import { DLayerNode } from "../node";
 import * as fs from 'fs'
 
-export class TestEnvContentServer{
+/*export class TestEnvContentServer{
     node: DLayerNode
     app: Express = express()
     port: number
@@ -43,4 +43,4 @@ export class TestEnvContentServer{
         this.node.deploy()
         return this.listen(this.port)
     }
-}
+}*/

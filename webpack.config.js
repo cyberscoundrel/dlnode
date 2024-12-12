@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
@@ -31,6 +32,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
         template: "./src/testenv/dashboard/index.html"
-    })
+    }),
+    new webpack.HotModuleReplacementPlugin()
 ]
 }
