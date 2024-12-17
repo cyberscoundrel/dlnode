@@ -18,7 +18,6 @@ class DLMonitorLayerClient {
         return value;
     }
     initClient(ws) {
-        //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {
             try {
                 let parsed = zodschemas_1.DLMonitorResponseZ.parse(JSON.parse(event.data));
@@ -52,6 +51,7 @@ class DLMonitorLayerClient {
         this.handleStat = (m) => { };
         this.openHook = () => { };
         this.url = url;
+        console.log(`connecting to ${url}`);
         this.socket = this.initClient(new WebSocket(this.url));
     }
 }

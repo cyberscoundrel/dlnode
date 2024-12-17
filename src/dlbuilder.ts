@@ -19,7 +19,8 @@ export enum ResponseCodes {
     nosend = -1,
     hit = 0,
     ticket = 1,
-    error = 2
+    error = 2,
+    info = 3
 }
 export enum ErrorCodes {
     genericError = -1,

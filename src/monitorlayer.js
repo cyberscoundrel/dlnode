@@ -7,6 +7,7 @@ exports.DLMonitorLayer = void 0;
 const ws_1 = __importDefault(require("ws"));
 const portfinder_1 = __importDefault(require("portfinder"));
 const zodschemas_1 = require("./zodschemas");
+//integrate into dlnode? with trust vs auth
 class DLMonitorLayer {
     replacer(key, value) {
         if (value instanceof Map) {
@@ -39,13 +40,14 @@ class DLMonitorLayer {
                         case "query":
                             try {
                                 let query = zodschemas_1.DLRequestZ.parse(parsed.message);
-                                this.dln.requestContent(query.contentHash.hash);
+                                this.dln.bowl.RequestContent(query.contentHash.hash, query.hops);
+                                console.log(`queried hash ${query.contentHash.hash}`);
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
                                         text: `queried hash ${query.contentHash.hash}`
                                     }
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -54,19 +56,19 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                         case "addCont":
                             try {
                                 let newCont = parsed.message.cont;
-                                this.dln.addRawContent(newCont);
+                                let rawCont = this.dln.contentCache.AddRawContent(newCont);
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
-                                        text: `added content ${newCont}: ${this.dln.hash(newCont)}`
+                                        text: `added content ${newCont}: ${rawCont.TransformToKey()}`
                                     }
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -75,19 +77,19 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                         case "addPeers":
                             try {
                                 let newPeers = parsed.message.peers;
                                 newPeers.forEach((e, i) => {
-                                    this.dln.addPeer(e);
+                                    this.dln.connectWS([e]);
                                 });
                                 ws.send(JSON.stringify({
                                     type: "stat",
                                     message: Object.assign({}, this.dln.getStat())
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -96,7 +98,7 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                     }
@@ -108,12 +110,13 @@ class DLMonitorLayer {
                         message: {
                             error: '' + err
                         }
-                    }));
+                    }, null, 3));
                 }
             });
         });
         return wss;
-    }
+    } //constructor option for original dlnode http server
+    //to directly implement monitor layer to dlnode for remote management with one http server instance with authentication
     constructor(port, dln) {
         this.dln = dln;
         this.port = port;
@@ -125,53 +128,25 @@ class DLMonitorLayer {
             });
             console.log(`motitor layer server listening on port ${p} for node localhost${dln.port}`);
             this.initServer(this.wss);
-            this.dln.contentHook((m) => {
+            this.dln.bowl.AddHook((m) => {
                 var _a;
                 (_a = this.wss) === null || _a === void 0 ? void 0 : _a.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "content",
                         message: m
-                    }));
+                    }, null, 3));
                 });
             });
-            this.dln.logHook((m) => {
+            this.dln.logger.logHook((m) => {
                 var _a;
-                //console.log(`monitor log hook`)
                 (_a = this.wss) === null || _a === void 0 ? void 0 : _a.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "log",
-                        message: m
-                    }));
+                        message: `${m}`
+                    }, null, 3));
                 });
             });
         });
     }
 }
 exports.DLMonitorLayer = DLMonitorLayer;
-/*export class DLMonitorLayerClient{
-    url: string
-    socket: WebSocket
-    handleLog: (m: any) => void = (m: any) => {}
-    handleContent: (m: any) => void = (m: any) => {}
-    initClient(ws: WebSocket): WebSocket {
-        ws.on('message', (msg) => {
-            try{
-                let parsed = DLMonitorResponseZ.parse(msg)
-                switch(parsed.type) {
-                    case "log": this.handleLog(parsed.message)
-                        break
-                    case "content": this.handleContent(parsed.message)
-                        break
-                }
-            }catch(err){
-                console.log(err)
-            }
-
-        })
-        return ws
-    }
-    constructor(url: string) {
-        this.url = url
-        this.socket = this.initClient(new WebSocket(this.url))
-    }
-}*/ 

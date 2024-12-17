@@ -19,14 +19,15 @@ var QueryCodes;
     QueryCodes[QueryCodes["request"] = 0] = "request";
     //execute = 1,
     QueryCodes[QueryCodes["response"] = 2] = "response";
-})(QueryCodes = exports.QueryCodes || (exports.QueryCodes = {}));
+})(QueryCodes || (exports.QueryCodes = QueryCodes = {}));
 var ResponseCodes;
 (function (ResponseCodes) {
     ResponseCodes[ResponseCodes["nosend"] = -1] = "nosend";
     ResponseCodes[ResponseCodes["hit"] = 0] = "hit";
     ResponseCodes[ResponseCodes["ticket"] = 1] = "ticket";
     ResponseCodes[ResponseCodes["error"] = 2] = "error";
-})(ResponseCodes = exports.ResponseCodes || (exports.ResponseCodes = {}));
+    ResponseCodes[ResponseCodes["info"] = 3] = "info";
+})(ResponseCodes || (exports.ResponseCodes = ResponseCodes = {}));
 var ErrorCodes;
 (function (ErrorCodes) {
     ErrorCodes[ErrorCodes["genericError"] = -1] = "genericError";
@@ -34,7 +35,7 @@ var ErrorCodes;
     ErrorCodes[ErrorCodes["invalidResponse"] = 1] = "invalidResponse";
     ErrorCodes[ErrorCodes["generationError"] = 2] = "generationError";
     ErrorCodes[ErrorCodes["internalError"] = 3] = "internalError";
-})(ErrorCodes = exports.ErrorCodes || (exports.ErrorCodes = {}));
+})(ErrorCodes || (exports.ErrorCodes = ErrorCodes = {}));
 class DLNodeErrorBase extends Error {
     constructor(msg) {
         super(msg);
@@ -58,7 +59,7 @@ exports.DLQueryBuilderError = DLQueryBuilderError;
 var InternalError;
 (function (InternalError) {
     InternalError[InternalError["ticketCreation"] = 0] = "ticketCreation";
-})(InternalError = exports.InternalError || (exports.InternalError = {}));
+})(InternalError || (exports.InternalError = InternalError = {}));
 class DLInternalError extends DLNodeErrorBase {
     constructor(msg, txt, errCode, tkt, context) {
         super(msg);

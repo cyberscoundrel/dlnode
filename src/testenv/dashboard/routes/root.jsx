@@ -15,13 +15,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -50,9 +60,11 @@ exports.Input = Input;
 const Sidebar = (props) => {
     return (<div className="lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
     {/* Sidebar component, swap this element with another sidebar if you like */}
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-900 px-6 pb-4">
       <div className="flex h-16 shrink-0 items-center">
-        <outline_1.HomeIcon className="h-6 w-6 text-white"></outline_1.HomeIcon>
+        <a href='/'>
+          <outline_1.HomeIcon className="h-6 w-6 text-white"></outline_1.HomeIcon>
+        </a>
       </div>
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -73,10 +85,10 @@ const Sidebar = (props) => {
           </li>
 
           <li className="mt-auto">
-            <a href="#" className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white">
+            <s><a href="#" className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white">
               <outline_1.Cog6ToothIcon aria-hidden="true" className="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"/>
               Settings
-            </a>
+            </a></s>
           </li>
         </ul>
       </nav>
@@ -94,7 +106,7 @@ const Root = () => {
             elms.push({
                 name: e.url,
                 href: `/node/${i}`,
-                icon: outline_1.HomeIcon,
+                icon: outline_1.ArrowUpCircleIcon,
                 current: false
             });
         });
@@ -107,19 +119,17 @@ const Root = () => {
             let newNodes = res.data.map((e, i) => {
                 return new monitorlayerclient_1.DLMonitorLayerClient(e);
             });
+            console.log(newNodes.length);
+            console.log(newNodes.map(e => e.socket.readyState));
+            console.log(newNodes.map(e => e.url));
             setNodes([...nodes, ...newNodes]);
+            console.log(nodes.length);
+            console.log(nodes.map(e => e.socket.url));
+            console.log(nodes);
         }).catch((err) => {
             console.log('no stat message');
         });
     }, []);
-    /*nodes.forEach((e, i) => {
-      elements.push({
-        name: e.url,
-        href: `/node/${i}`,
-        icon: HomeIcon,
-        current: false
-      })
-    })*/
     const handleAdd = () => {
         let dlm = new monitorlayerclient_1.DLMonitorLayerClient(`ws://${field}`);
         setNodes([...nodes, dlm]);

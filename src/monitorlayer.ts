@@ -1,11 +1,14 @@
-import { DLayerNode } from "./dlnode";
+import { DLayerNode } from "./node";
 import WebSocket, { WebSocketServer } from 'ws';
 import portfinder from 'portfinder'
 import { DLMonitorRequestZ, DLMonitorResponseZ, DLQueryZ, DLRequestZ } from "./zodschemas";
 import type { DLMonitorRequest, DLMonitorResponse } from "./zodschemas";
-
+import { IContent } from "./cacheobject";
+//integrate into dlnode? with trust vs auth
 export class DLMonitorLayer{
     dln: DLayerNode
+    //create type that abstracts either raw dln object or proxy mirror connection
+    //proxy mirror is just relay to monitor with restricted trust
     wss?: WebSocketServer
     port: number
     replacer(key: any, value: any) {
@@ -35,20 +38,21 @@ export class DLMonitorLayer{
                             ws.send(JSON.stringify({
                                 type: "stat",
                                 message: {
-                                    ...this.dln.getStat()
+                                    ...this.dln.getStat(),
                                 }
                             },this.replacer))
                             break
                         case "query": 
                             try{
                                 let query = DLRequestZ.parse(parsed.message!)
-                                this.dln.requestContent(query.contentHash.hash)
+                                this.dln.bowl.RequestContent(query.contentHash.hash, query.hops)
+                                console.log(`queried hash ${query.contentHash.hash}`)
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
                                         text: `queried hash ${query.contentHash.hash}`
                                     }
-                                }))
+                                }, null, 3))
                             }catch(err){
                                 console.log(err)
                                 ws.send(JSON.stringify({
@@ -56,20 +60,21 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
 
                             }
                             break
                         case "addCont": 
                             try {
                                 let newCont = parsed.message!.cont as string
-                                this.dln.addRawContent(newCont)
+                                
+                                let rawCont = this.dln.contentCache.AddRawContent(newCont)
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
-                                        text: `added content ${newCont}: ${this.dln.hash(newCont)}`
+                                        text: `added content ${newCont}: ${rawCont.TransformToKey()}`
                                     }
-                                }))
+                                }, null, 3))
                             }catch(err){
                                 console.log(err)
                                 ws.send(JSON.stringify({
@@ -77,7 +82,7 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
 
                             }
                             break
@@ -85,7 +90,7 @@ export class DLMonitorLayer{
                             try{
                                 let newPeers = parsed.message!.peers as string[]
                                 newPeers.forEach((e, i) => {
-                                    this.dln.addPeer(e)
+                                    this.dln.connectWS([e])
                                 })
                                 
                                 ws.send(JSON.stringify({
@@ -93,7 +98,7 @@ export class DLMonitorLayer{
                                     message: {
                                         ...this.dln.getStat()
                                     }
-                                }))
+                                }, null, 3))
 
 
                             } catch(err) {
@@ -103,7 +108,7 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
                             }
                             break
                     }
@@ -114,14 +119,15 @@ export class DLMonitorLayer{
                         message: {
                             error: '' + err
                         }
-                    }))
+                    }, null, 3))
 
                 }
 
             })
         })
         return wss
-    }
+    }//constructor option for original dlnode http server
+    //to directly implement monitor layer to dlnode for remote management with one http server instance with authentication
     constructor(port: number, dln: DLayerNode) {
         this.dln = dln
         this.port = port
@@ -133,51 +139,24 @@ export class DLMonitorLayer{
             })
             console.log(`motitor layer server listening on port ${p} for node localhost${dln.port}`)
             this.initServer(this.wss)
-            this.dln.contentHook((m) => {
+            this.dln.bowl.AddHook((m) => {
                 this.wss?.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "content",
                         message: m
-                    }))
+                    }, null, 3))
                 })
             })
-            this.dln.logHook((m) => {
-                //console.log(`monitor log hook`)
+            this.dln.logger.logHook((m) => {
                 this.wss?.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "log",
-                        message: m
-                    }))
+                        message: `${m}`
+                    }, null, 3))
                 })
             })
+            
         })
     }
 }
 
-/*export class DLMonitorLayerClient{
-    url: string
-    socket: WebSocket
-    handleLog: (m: any) => void = (m: any) => {}
-    handleContent: (m: any) => void = (m: any) => {}
-    initClient(ws: WebSocket): WebSocket {
-        ws.on('message', (msg) => {
-            try{
-                let parsed = DLMonitorResponseZ.parse(msg)
-                switch(parsed.type) {
-                    case "log": this.handleLog(parsed.message)
-                        break
-                    case "content": this.handleContent(parsed.message)
-                        break
-                }
-            }catch(err){
-                console.log(err)
-            }
-
-        })
-        return ws
-    }
-    constructor(url: string) {
-        this.url = url
-        this.socket = this.initClient(new WebSocket(this.url))
-    }
-}*/
