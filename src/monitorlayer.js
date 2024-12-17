@@ -139,7 +139,6 @@ class DLMonitorLayer {
             });
             this.dln.logger.logHook((m) => {
                 var _a;
-                //console.log(`monitor log hook`)
                 (_a = this.wss) === null || _a === void 0 ? void 0 : _a.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "log",
@@ -147,51 +146,7 @@ class DLMonitorLayer {
                     }, null, 3));
                 });
             });
-            /*this.dln.contentHook((m) => {
-                this.wss?.clients.forEach((e, i) => {
-                    e.send(JSON.stringify({
-                        type: "content",
-                        message: m
-                    }))
-                })
-            })
-            this.dln.logHook((m) => {
-                //console.log(`monitor log hook`)
-                this.wss?.clients.forEach((e, i) => {
-                    e.send(JSON.stringify({
-                        type: "log",
-                        message: m
-                    }))
-                })
-            })*/
         });
     }
 }
 exports.DLMonitorLayer = DLMonitorLayer;
-/*export class DLMonitorLayerClient{
-    url: string
-    socket: WebSocket
-    handleLog: (m: any) => void = (m: any) => {}
-    handleContent: (m: any) => void = (m: any) => {}
-    initClient(ws: WebSocket): WebSocket {
-        ws.on('message', (msg) => {
-            try{
-                let parsed = DLMonitorResponseZ.parse(msg)
-                switch(parsed.type) {
-                    case "log": this.handleLog(parsed.message)
-                        break
-                    case "content": this.handleContent(parsed.message)
-                        break
-                }
-            }catch(err){
-                console.log(err)
-            }
-
-        })
-        return ws
-    }
-    constructor(url: string) {
-        this.url = url
-        this.socket = this.initClient(new WebSocket(this.url))
-    }
-}*/ 

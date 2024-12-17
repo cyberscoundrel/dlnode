@@ -115,33 +115,17 @@ app.use(webpackDevMiddleware(compiler, {
 
 app.use(webpackHotMiddleware(compiler));
 
-/*app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'))
-})
-app.get('/bundle.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'bundle.js'))
-})
-app.get('/bundle.js.map', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'bundle.js.map'))
-})
-app.get('/output.css', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'output.css'))
-})*/
 app.get('/instances', (req, res) => {
     res.send(JSON.stringify(mnodes.map((v, i) => {
         return `ws://localhost:${v.port}`
     })))
 })
 testEnvWithConfig()
-//testEnv()
+
 portfinder.setBasePort(3000)
 let pf = portfinder.getPortPromise().then((port) => {
     app.listen(port, () => {
         console.log(`dashboard backend listening on ${port}`)
     })
 })
-
-/*function webpack(webpackConfig: any) {
-    throw new Error('Function not implemented.')
-}*/
 

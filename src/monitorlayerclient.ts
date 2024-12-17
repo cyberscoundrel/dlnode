@@ -23,7 +23,6 @@ export class DLMonitorLayerClient{
         return value
     }
     initClient(ws: WebSocket): WebSocket {
-        //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {
             try{
                 let parsed = DLMonitorResponseZ.parse(JSON.parse(event.data))

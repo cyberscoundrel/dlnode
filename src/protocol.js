@@ -19,28 +19,20 @@ class WSProtocol extends IProtocol {
         return WSProtocol._instance;
     }
     _initWS(peer) {
-        //console.log(`initializing socket with url ${remoteAddress}`)
         this.GetLogger().log(`initializing socket with url ${peer._fields.host}`);
         peer._ws.on('message', (msg) => {
             let qb = new dlbuilder_1.DLQueryBuilder();
-            /*let context = {
-                reply:(m: any) => ws.send(m),
-                socketID: this.Hash(remoteAddress),
-                socket: remoteAddress
-            }*/
             try {
                 this.GetLogger().log(`received message from ${peer._fields.host}: ${msg.toString()}`);
                 let prsed = JSON.parse(msg.toString());
                 let dmsg = zodschemas_1.DLQueryZ.parse(JSON.parse(msg.toString()));
                 this.GetLogger().log(`psd content ${JSON.stringify(prsed, null, 2)}`);
                 peer._dln.dlayer(dmsg, qb, peer);
-                //this.dlayer(dmsg, qb, context)
             }
             catch (err) {
                 this.GetLogger().log(`error in dlayer ${err}`);
                 if (err instanceof dlbuilder_1.DLQueryBuilderError) {
                     this.GetLogger().log(`querybuilder error`);
-                    //this.handleDLNodeError(err, qb)
                 }
                 else if (err instanceof zod_1.ZodError) {
                     this.GetLogger().log(`zod error`);
@@ -49,11 +41,9 @@ class WSProtocol extends IProtocol {
             }
             this.GetLogger().log(`end of dlayer`);
             peer.Send(qb);
-            //peer._filterSend(qb)
         });
         peer._ws.on('close', () => {
             this.GetLogger().log(`${peer._ws.url} disconnected`);
-            //this.socketTearDown(peer._ws.url)
         });
         return peer._ws;
     }
@@ -63,7 +53,6 @@ class WSProtocol extends IProtocol {
         peer.SetSend((m) => {
             peer._ws.send(JSON.stringify(m));
         });
-        //dln.initWS()
     }
     constructor(logger) {
         super(logger);

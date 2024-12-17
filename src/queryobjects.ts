@@ -54,8 +54,6 @@ export class RequestO{
     }
 }*/
 export class Ticket extends ICacheObject{
-    /*_ticket: Partial<DLQueryTicket>
-    _request: Partial<DLRequest>*/
     _cache: ITicketCache<any>
     _peer: IPeer<IProtocol<any>>
     //indexed by response
@@ -70,15 +68,10 @@ export class Ticket extends ICacheObject{
         return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(JSON.stringify(this._fields._request)))
         //return this._peer.TransformToKey()
     }
-    /*TransformToIndex(): string {
-        return this._peer.TransformToKey()
-        //return this._ticket.txn!
-    }*/
+
     constructor(cache: ITicketCache<any>, peer: IPeer<any>, tc: Partial<DLQueryTicket> = {}, r: Partial<DLRequest> = {}){
         super()
-        //this._fields._ticket = tc
         this._peer = peer
-        //this._request = r
         this._cache = cache
         this._fields = {
             _ticket: tc,
@@ -121,8 +114,6 @@ export class Ticket extends ICacheObject{
                 message: {}
             })
             this._peer.Send(rbb)
-            //_peer.send
-
         }
         rb.DLNoSend("ticket resolved")
         sender.Send(rb)

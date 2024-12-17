@@ -56,7 +56,6 @@ export class DLayerNode extends EventEmitter {
         err.buildError(rb)
     }
     resolveResponse(message: DLQuery, rb: DLQueryBuilder, peer: IPeer<any>) {
-        //let ticket = message.ticket
         this.logger.log(`resolve response`)
         switch(message.res!.status){
             case ResponseCodes.hit:
@@ -79,7 +78,6 @@ export class DLayerNode extends EventEmitter {
     }
 
     resolveContentRequest(message: DLQuery, rb: DLQueryBuilder, peer: IPeer<any>) {
-        //console.log(`received request ${JSON.stringify(message)}`)
         this.logger.log(`received request ${JSON.stringify(message)}`)
         rb.setType(QueryCodes.response).setReq(message.req!).setRes({status: ResponseCodes.info}).setMessage({
             text: "received request"
@@ -102,7 +100,6 @@ export class DLayerNode extends EventEmitter {
                     this.logger.log(`what the hell`)
                     this.ticketCache.CreateTicket(peer, message.req!, message.ticket, rb, (e) => {
                         this.logger.log(`whats happening`)
-                        //this.logger.log(`ticket created ${JSON.stringify(e, null, 2)}`)
                         this.logger.log(`where are we`)
                         let qbb = new DLQueryBuilder().from(message).setTicket(e.GetTicket())
                         this.peerCache.QueryPeers(peer, qbb).catch((err) => {

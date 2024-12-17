@@ -54,17 +54,11 @@ class Ticket extends cacheobject_1.ICacheObject {
         return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(JSON.stringify(this._fields._request)));
         //return this._peer.TransformToKey()
     }
-    /*TransformToIndex(): string {
-        return this._peer.TransformToKey()
-        //return this._ticket.txn!
-    }*/
     constructor(cache, peer, tc = {}, r = {}) {
         super();
         //indexed by response
         this._responses = new Map();
-        //this._fields._ticket = tc
         this._peer = peer;
-        //this._request = r
         this._cache = cache;
         this._fields = {
             _ticket: tc,
@@ -106,7 +100,6 @@ class Ticket extends cacheobject_1.ICacheObject {
                 message: {}
             });
             this._peer.Send(rbb);
-            //_peer.send
         }
         rb.DLNoSend("ticket resolved");
         sender.Send(rb);

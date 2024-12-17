@@ -32645,7 +32645,6 @@ var DLMonitorLayerClient = /*#__PURE__*/function () {
     key: "initClient",
     value: function initClient(ws) {
       var _this = this;
-      //ws.on('message', (msg) => {
       ws.addEventListener('message', function (event) {
         try {
           var parsed = zodschemas_1.DLMonitorResponseZ.parse(JSON.parse(event.data));
@@ -32743,86 +32742,6 @@ function classNames() {
   }
   return classes.filter(Boolean).join(' ');
 }
-/*export const nodeLoader = (async (data: LoaderFunctionArgs) => {
-  return clients[parseInt(data.params.nodeID!)]
-}) satisfies LoaderFunction
-export const rootLoader = (async () => {
-  let navNodes: NavType[] = []
-  clients.forEach((e, i) => {
-    navNodes.push({
-      name: e.url,
-      href: `/node/${i}`,
-      icon: HomeIcon,
-      current: false
-    })
-    return navNodes
-  })
-
-
-}) satisfies LoaderFunction*/
-//const clients: DLMonitorLayerClient[] = []
-/*const navigation = [
-
-
-    { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-    { name: 'Team', href: '#', icon: UsersIcon, current: false },
-    { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-    { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-    { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-    { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-  ]
-/*export const Sidebar = () => {
-    return (<div className="lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-    {/* Sidebar component, swap this element with another sidebar if you like */ /*}
-                                                                                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
-                                                                                 <div className="flex h-16 shrink-0 items-center">
-                                                                                 <HomeIcon className="h-6 w-6 text-white"></HomeIcon>
-                                                                                 </div>
-                                                                                 <nav className="flex flex-1 flex-col">
-                                                                                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                                                                                 <li>
-                                                                                 <ul role="list" className="-mx-2 space-y-1">
-                                                                                 {navigation.map((item) => (
-                                                                                 <li key={item.name}>
-                                                                                 <a
-                                                                                 href={item.href}
-                                                                                 className={classNames(
-                                                                                 item.current
-                                                                                 ? 'bg-indigo-700 text-white'
-                                                                                 : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
-                                                                                 'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                                                                                 )}
-                                                                                 >
-                                                                                 <item.icon
-                                                                                 aria-hidden="true"
-                                                                                 className={classNames(
-                                                                                 item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white',
-                                                                                 'h-6 w-6 shrink-0',
-                                                                                 )}
-                                                                                 />
-                                                                                 {item.name}
-                                                                                 </a>
-                                                                                 </li>
-                                                                                 ))}
-                                                                                 </ul>
-                                                                                 </li>
-                                                                                 <li className="mt-auto">
-                                                                                 <a
-                                                                                 href="#"
-                                                                                 className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
-                                                                                 >
-                                                                                 <Cog6ToothIcon
-                                                                                 aria-hidden="true"
-                                                                                 className="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
-                                                                                 />
-                                                                                 Settings
-                                                                                 </a>
-                                                                                 </li>
-                                                                                 </ul>
-                                                                                 </nav>
-                                                                                 </div>
-                                                                                 </div>)
-                                                                                 }*/
 var router = (0, react_router_dom_1.createBrowserRouter)([{
   path: "/",
   element: /*#__PURE__*/React.createElement(root_jsx_1.Root, null),
@@ -32996,20 +32915,6 @@ var TextArea = function TextArea(props) {
   }));
 };
 exports.TextArea = TextArea;
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
 var Tabs0 = function Tabs0() {
   var _a;
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -33047,9 +32952,6 @@ var Tabs0 = function Tabs0() {
 exports.Tabs0 = Tabs0;
 var InnerNode = function InnerNode(props) {
   console.log('node reload');
-  //let oldNode = React.useRef<DLMonitorLayerClient>()
-  //let [nodes, sideBarPops, setSideBarProps] = useOutletContext<[DLMonitorLayerClient[], NavType[], React.Dispatch<React.SetStateAction<NavType[]>>]>()
-  //let [log, setLog] = React.useState<string>('')
   var _React$useState = React.useState(''),
     _React$useState2 = _slicedToArray(_React$useState, 2),
     content = _React$useState2[0],
@@ -33083,19 +32985,6 @@ var InnerNode = function InnerNode(props) {
     contents = _React$useState16[0],
     setContents = _React$useState16[1];
   console.log("log ".concat(props.log, " stat ").concat(stat));
-  /*props.node.handleContent = (m: any) => {
-      setContent(content + JSON.stringify(m, null, 3))
-  }
-  props.node.handleLog = (m: any) => {
-      setLog(log + JSON.stringify(m, null, 3))
-  }
-  props.node.handleStat = (m: any) => {
-      //console.log('set stat')
-      //console.log(m)
-      setStat(stat + JSON.stringify(m, null, 3))
-      //setLog(log + m)
-      
-  }*/
   function reviver(key, value) {
     if (_typeof(value) === 'object' && value !== null) {
       if (value.dataType === 'Map') {
@@ -33104,16 +32993,6 @@ var InnerNode = function InnerNode(props) {
     }
     return value;
   }
-  /*function replacer(key: string, value: any) {
-      if(value instanceof Map) {
-        return {
-          dataType: 'Map',
-          value: Array.from(value.entries()), // or with spread: value: [...value]
-        };
-      } else {
-        return value;
-      }
-  }*/
   var addToLog = function addToLog(m) {
     console.log("logging from hook".concat('' + m));
     console.log(props.log);
@@ -33134,28 +33013,14 @@ var InnerNode = function InnerNode(props) {
       addToLog(m);
     };
     props.node.handleStat = function (m) {
-      //console.log('set stat')
-      //console.log(m)
-      //setStat(stat + JSON.stringify(m, null, 3))
       setOStat(m);
-      //setLog(log + m)
     };
     getStat();
   }, []);
-  /*React.useEffect(() => {
-      return () => {
-          console.log('resetting hooks')
-          props.node.handleContent = (m: any) => {}
-          props.node.handleLog = (m: any) => {}
-          props.node.handleStat = (m: any) => {}
-      }
-  })*/
   var getStat = function getStat() {
-    //console.log('get stat')
     props.node.socket.send(JSON.stringify({
       type: "stat"
     }));
-    //setStat(stat + 'get stat')
   };
   var addCont = function addCont() {
     if (newCont != '') {
@@ -33200,23 +33065,6 @@ var InnerNode = function InnerNode(props) {
       }
     }
   };
-  /*React.useEffect(() => {
-      console.log('on reload')
-      node.handleContent = (m: any) => {
-          setContent(content + JSON.stringify(m))
-      }
-      node.handleLog = (m: any) => {
-          setLog(log + JSON.stringify(m))
-      }
-      node.handleStat = (m: any) => {
-          console.log('set stat')
-          console.log(m)
-          setStat(stat + JSON.stringify(m))
-          setLog(log + m)
-          
-      }
-      getStat()
-  }, [])*/
   var statreplacer = function statreplacer(key, value) {
     if (key === 'log' || key === 'content' || key === 'debug') {
       return undefined;
@@ -33231,22 +33079,14 @@ var InnerNode = function InnerNode(props) {
       setStat(JSON.stringify(ostat, statreplacer, 3));
       props.setLog(ost.log.replace(/^\[/gm, ">["));
       setCont(ost.content);
-      //let ca: ContentType[] = []
       setContents(ost.contentCache.map(function (v, i) {
         return {
           name: v.value
         };
       }));
-      /*if(ost && log == '') {
-          setLog(ost.log)
-      }
-      if(ost && content == '') {
-          setCont(ost.content)
-      }*/
     }
   }, [ostat]);
   React.useEffect(function () {
-    //console.log(`oldstate ${oldNode.current?.url}`)
     console.log("new ".concat(props.node.url));
     return function () {
       console.log("old ".concat(props.node.url));
@@ -33254,7 +33094,6 @@ var InnerNode = function InnerNode(props) {
       props.node.handleLog = function (m) {};
       props.node.handleStat = function (m) {};
     };
-    //oldNode.current = props.node
   }, [props.node]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(exports.Tabs0, null), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
@@ -33320,17 +33159,11 @@ var Node = function Node() {
   console.log('outer node reload');
   var _ref = (0, react_router_dom_1.useParams)(),
     nodeID = _ref.nodeID;
-  //let oldID = React.useRef<string>(nodeID!)
   var _ref2 = (0, react_router_dom_1.useOutletContext)(),
     _ref3 = _slicedToArray(_ref2, 3),
     nodes = _ref3[0],
     sideBarProps = _ref3[1],
     setSideBarProps = _ref3[2];
-  /*let [log, setLog] = React.useState<string>('')
-  let [content, setContent] = React.useState<string>('')
-  let [stat, setStat] = React.useState<string>('')
-  let [newPeer, setNewPeer] = React.useState<string>('')
-  let [cont, setCont] = React.useState<string>('')*/
   var nid = parseInt(nodeID);
   console.log("nid ".concat(nid));
   var node = nodes[nid];
@@ -33338,96 +33171,6 @@ var Node = function Node() {
     _React$useState18 = _slicedToArray(_React$useState17, 2),
     log = _React$useState18[0],
     setLog = _React$useState18[1];
-  /*React.useEffect(() => {
-      console.log(`oldstate ${oldID.current}`)
-      console.log(`newstate ${nodeID}`)
-      nodes[parseInt(nodeID!)].
-      oldID.current = nodeID!
-  }, [nodeID])*/
-  //let loc  = useLocation()
-  //console.log(`log ${log} stat ${stat}`)
-  /*node.handleContent = (m: any) => {
-      setContent(content + JSON.stringify(m))
-  }
-  node.handleLog = (m: any) => {
-      setLog(log + JSON.stringify(m))
-  }
-  node.handleStat = (m: any) => {
-      console.log('set stat')
-      console.log(m)
-      setStat(stat + JSON.stringify(m))
-      setLog(log + m)
-      
-  }
-  /*React.useEffect(() => {
-      return () => {
-          console.log('resetting hooks')
-          node.handleContent = (m: any) => {}
-          node.handleLog = (m: any) => {}
-          node.handleStat = (m: any) => {}
-      }
-  })*/
-  /*React.useEffect(() => {
-      //manually change states, update current node
-       setLog('please rerender' + log)
-      console.log('please rerender')
-  }, [loc, node])*/
-  /*const getStat = () => {
-      console.log('get stat')
-      node.socket.send(JSON.stringify({
-          type: "stat"
-      }))
-      setStat(stat + 'get stat')
-   }
-  const requestCont = () => {
-      if(cont != '') {
-      let hsh = CryptoJS.SHA256(cont)
-          node.socket.send(JSON.stringify({
-              type: 'query',
-              message: {
-                  contentHash: {
-                      hash: hsh.toString()
-                  }
-              }
-          }))
-      }
-      
-  }
-  const setPeers = () => {
-      let peerRegex = /ws:\/\/[a-zA-Z0-9\.\-]+(\:[0-9]+)?/
-      if(newPeer != '') {
-          if(peerRegex.test(newPeer)) {
-              node.socket.send(JSON.stringify({
-                  type: 'addPeers',
-                  message: {
-                      peers: [newPeer]
-                  }
-              }))
-          }
-       }
-  }
-  
-  /*React.useEffect(() => {
-      console.log('on reload')
-      node.handleContent = (m: any) => {
-          setContent(content + JSON.stringify(m))
-      }
-      node.handleLog = (m: any) => {
-          setLog(log + JSON.stringify(m))
-      }
-      node.handleStat = (m: any) => {
-          console.log('set stat')
-          console.log(m)
-          setStat(stat + JSON.stringify(m))
-          setLog(log + m)
-          
-      }
-      getStat()
-  }, [])*/
-  /*React.useEffect(() => {
-      console.log('stat change')
-      console.log(stat)
-  }, [stat])*/
   React.useEffect(function () {
     console.log('why did log change');
     console.log(log);
@@ -33637,14 +33380,6 @@ var Root = function Root() {
       console.log('no stat message');
     });
   }, []);
-  /*nodes.forEach((e, i) => {
-    elements.push({
-      name: e.url,
-      href: `/node/${i}`,
-      icon: HomeIcon,
-      current: false
-    })
-  })*/
   var handleAdd = function handleAdd() {
     var dlm = new monitorlayerclient_1.DLMonitorLayerClient("ws://".concat(field));
     setNodes([].concat(_toConsumableArray(nodes), [dlm]));
@@ -39237,7 +38972,7 @@ module.exports = axios;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("4aab0aed77f84c267893")
+/******/ 		__webpack_require__.h = () => ("3514788174d43d647f7b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

@@ -130,14 +130,6 @@ const Root = () => {
             console.log('no stat message');
         });
     }, []);
-    /*nodes.forEach((e, i) => {
-      elements.push({
-        name: e.url,
-        href: `/node/${i}`,
-        icon: HomeIcon,
-        current: false
-      })
-    })*/
     const handleAdd = () => {
         let dlm = new monitorlayerclient_1.DLMonitorLayerClient(`ws://${field}`);
         setNodes([...nodes, dlm]);

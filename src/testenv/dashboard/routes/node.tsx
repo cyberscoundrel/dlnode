@@ -115,21 +115,6 @@ export const TextArea = (props: TextAreaPropType) => {
 
 }
 
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-
   
   export const Tabs0 = () => {
     return (
@@ -183,9 +168,6 @@ type InnerNodePropType = {
 }
 const InnerNode = (props: InnerNodePropType) => {
     console.log('node reload')
-    //let oldNode = React.useRef<DLMonitorLayerClient>()
-    //let [nodes, sideBarPops, setSideBarProps] = useOutletContext<[DLMonitorLayerClient[], NavType[], React.Dispatch<React.SetStateAction<NavType[]>>]>()
-    //let [log, setLog] = React.useState<string>('')
     let [content, setContent] = React.useState<string>('')
     let [stat, setStat] = React.useState<string>('')
     let [ostat, setOStat] = React.useState<unknown>()
@@ -197,19 +179,6 @@ const InnerNode = (props: InnerNodePropType) => {
     
     console.log(`log ${props.log} stat ${stat}`)
 
-    /*props.node.handleContent = (m: any) => {
-        setContent(content + JSON.stringify(m, null, 3))
-    }
-    props.node.handleLog = (m: any) => {
-        setLog(log + JSON.stringify(m, null, 3))
-    }
-    props.node.handleStat = (m: any) => {
-        //console.log('set stat')
-        //console.log(m)
-        setStat(stat + JSON.stringify(m, null, 3))
-        //setLog(log + m)
-        
-    }*/
     function reviver(key: string, value: any) {
         if(typeof value === 'object' && value !== null) {
             if (value.dataType === 'Map') {
@@ -218,16 +187,6 @@ const InnerNode = (props: InnerNodePropType) => {
         }
         return value;
     }
-    /*function replacer(key: string, value: any) {
-        if(value instanceof Map) {
-          return {
-            dataType: 'Map',
-            value: Array.from(value.entries()), // or with spread: value: [...value]
-          };
-        } else {
-          return value;
-        }
-    }*/
    const addToLog = (m: any) => {
         console.log(`logging from hook${('' + m)}`)
         console.log(props.log)
@@ -245,11 +204,7 @@ const InnerNode = (props: InnerNodePropType) => {
             addToLog(m)
         }
         props.node.handleStat = (m: any) => {
-            //console.log('set stat')
-            //console.log(m)
-            //setStat(stat + JSON.stringify(m, null, 3))
             setOStat(m)
-            //setLog(log + m)
             
         }
         getStat()
@@ -258,21 +213,10 @@ const InnerNode = (props: InnerNodePropType) => {
 
 
     }, [])
-    /*React.useEffect(() => {
-        return () => {
-            console.log('resetting hooks')
-            props.node.handleContent = (m: any) => {}
-            props.node.handleLog = (m: any) => {}
-            props.node.handleStat = (m: any) => {}
-        }
-    })*/
     const getStat = () => {
-        //console.log('get stat')
         props.node.socket.send(JSON.stringify({
             type: "stat"
         }))
-        //setStat(stat + 'get stat')
-
     }
     const addCont = () => {
         if(newCont != ''){
@@ -319,24 +263,6 @@ const InnerNode = (props: InnerNodePropType) => {
 
         }
     }
-    
-    /*React.useEffect(() => {
-        console.log('on reload')
-        node.handleContent = (m: any) => {
-            setContent(content + JSON.stringify(m))
-        }
-        node.handleLog = (m: any) => {
-            setLog(log + JSON.stringify(m))
-        }
-        node.handleStat = (m: any) => {
-            console.log('set stat')
-            console.log(m)
-            setStat(stat + JSON.stringify(m))
-            setLog(log + m)
-            
-        }
-        getStat()
-    }, [])*/
     const statreplacer = (key: string, value: any) => {
         if(key === 'log' || key === 'content' || key === 'debug') {
             return undefined
@@ -355,24 +281,16 @@ const InnerNode = (props: InnerNodePropType) => {
             setStat(JSON.stringify(ostat, statreplacer, 3))
             props.setLog(ost.log.replace(/^\[/gm, ">["))
             setCont(ost.content)
-            //let ca: ContentType[] = []
             
             setContents(ost.contentCache.map((v, i) => {
                 return {
                     name: v.value
                 }
             }))
-            /*if(ost && log == '') {
-                setLog(ost.log)
-            }
-            if(ost && content == '') {
-                setCont(ost.content)
-            }*/
         }
             
     }, [ostat])
     React.useEffect(() => {
-        //console.log(`oldstate ${oldNode.current?.url}`)
         console.log(`new ${props.node.url}`)
         return () => {
             console.log(`old ${props.node.url}`)
@@ -381,7 +299,6 @@ const InnerNode = (props: InnerNodePropType) => {
             props.node.handleStat = (m: any) => {}
 
         }
-        //oldNode.current = props.node
     }, [props.node])
 
     return (
@@ -415,112 +332,12 @@ const InnerNode = (props: InnerNodePropType) => {
 export const Node = () => {
     console.log('outer node reload')
     let { nodeID } = useParams()
-    //let oldID = React.useRef<string>(nodeID!)
     
     let [nodes, sideBarProps, setSideBarProps] = useOutletContext<[DLMonitorLayerClient[], NavType[], React.Dispatch<React.SetStateAction<NavType[]>>]>()
-    /*let [log, setLog] = React.useState<string>('')
-    let [content, setContent] = React.useState<string>('')
-    let [stat, setStat] = React.useState<string>('')
-    let [newPeer, setNewPeer] = React.useState<string>('')
-    let [cont, setCont] = React.useState<string>('')*/
     let nid = parseInt(nodeID!)
     console.log(`nid ${nid}`)
     let node = nodes[nid]
     let [log, setLog] = React.useState<string>('')
-    /*React.useEffect(() => {
-        console.log(`oldstate ${oldID.current}`)
-        console.log(`newstate ${nodeID}`)
-        nodes[parseInt(nodeID!)].
-        oldID.current = nodeID!
-    }, [nodeID])*/
-    //let loc  = useLocation()
-    //console.log(`log ${log} stat ${stat}`)
-
-    /*node.handleContent = (m: any) => {
-        setContent(content + JSON.stringify(m))
-    }
-    node.handleLog = (m: any) => {
-        setLog(log + JSON.stringify(m))
-    }
-    node.handleStat = (m: any) => {
-        console.log('set stat')
-        console.log(m)
-        setStat(stat + JSON.stringify(m))
-        setLog(log + m)
-        
-    }
-    /*React.useEffect(() => {
-        return () => {
-            console.log('resetting hooks')
-            node.handleContent = (m: any) => {}
-            node.handleLog = (m: any) => {}
-            node.handleStat = (m: any) => {}
-        }
-    })*/
-    /*React.useEffect(() => {
-        //manually change states, update current node
-
-        setLog('please rerender' + log)
-        console.log('please rerender')
-    }, [loc, node])*/
-    /*const getStat = () => {
-        console.log('get stat')
-        node.socket.send(JSON.stringify({
-            type: "stat"
-        }))
-        setStat(stat + 'get stat')
-
-    }
-    const requestCont = () => {
-        if(cont != '') {
-        let hsh = CryptoJS.SHA256(cont)
-            node.socket.send(JSON.stringify({
-                type: 'query',
-                message: {
-                    contentHash: {
-                        hash: hsh.toString()
-                    }
-                }
-            }))
-        }
-        
-    }
-    const setPeers = () => {
-        let peerRegex = /ws:\/\/[a-zA-Z0-9\.\-]+(\:[0-9]+)?/
-        if(newPeer != '') {
-            if(peerRegex.test(newPeer)) {
-                node.socket.send(JSON.stringify({
-                    type: 'addPeers',
-                    message: {
-                        peers: [newPeer]
-                    }
-                }))
-            }
-
-        }
-    }
-    
-    /*React.useEffect(() => {
-        console.log('on reload')
-        node.handleContent = (m: any) => {
-            setContent(content + JSON.stringify(m))
-        }
-        node.handleLog = (m: any) => {
-            setLog(log + JSON.stringify(m))
-        }
-        node.handleStat = (m: any) => {
-            console.log('set stat')
-            console.log(m)
-            setStat(stat + JSON.stringify(m))
-            setLog(log + m)
-            
-        }
-        getStat()
-    }, [])*/
-    /*React.useEffect(() => {
-        console.log('stat change')
-        console.log(stat)
-    }, [stat])*/
     React.useEffect(() => {
       console.log('why did log change')
       console.log(log)

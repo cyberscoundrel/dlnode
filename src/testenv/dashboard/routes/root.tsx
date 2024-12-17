@@ -42,19 +42,6 @@ export type NavType = {
   icon: typeof HomeIcon
   current: boolean
 }
-
-
-
-/*const navigation: NavType[] = [
-
-
-    { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-    { name: 'Team', href: '#', icon: UsersIcon, current: false },
-    { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-    { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-    { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-    { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-  ]*/
  type InputPropType = {
   onField: (e: any) => void
   onAdd: () => void
@@ -181,25 +168,11 @@ export const Root = () => {
       console.log(nodes.length)
       console.log(nodes.map(e => e.socket.url))
       console.log(nodes)
-
-
-
-      
-        
     }).catch((err) => {
         console.log('no stat message')
     })
   }, [])
 
-
-  /*nodes.forEach((e, i) => {
-    elements.push({
-      name: e.url,
-      href: `/node/${i}`,
-      icon: HomeIcon,
-      current: false
-    })
-  })*/
 
   const handleAdd = () => {
     let dlm = new DLMonitorLayerClient(`ws://${field}`)

@@ -22,24 +22,12 @@ export abstract class ICacheObject{
         return this._fields
     }
     //must be unique
-    /*_assertIsType(obj: unknown): asserts obj is Partial<this> {
-        if(obj instanceof Object) {
-            Object.keys(obj).forEach((v, i) => {
-                if((this.GetKeyFields() as Record<string, unknown>)[v] == undefined){
-                    throw new Error("not a valid type")
-                }
-            })
-            return
-        }
-        throw new Error("not a valid type")
-    }*/
+
     TransformToKey(): string {
         return this._cache.GetHashAlg().Hash(JSON.stringify(this.GetKeyFields()))
     }
     MatchKeyFields(object: Record<string, unknown>, overlap: boolean): boolean {
-        //this._assertIsType(object)
-        /*let overlapCount = 0
-        let keyFields = this.GetKeyFields()*/
+
         const objectKeys = Object.keys(object);
         const fieldKeys = Object.keys(this._fields);
 
@@ -48,20 +36,11 @@ export abstract class ICacheObject{
         } else {
             return fieldKeys.every((key) => objectKeys.includes(key));
         }
-        /*Object.keys(object as object).forEach((v, i) => {
-            if(object[v] == (keyFields as Record<string, unknown>)[v]){
-                overlapCount++
-            }
-        })
-        if(overlap){
-            return overlapCount > 0
-        }else{
-            return overlapCount == Object.keys(object as object).length
-        }*/
+
         
     }
     protected constructor(){
-        //this._cache = cache
+
     }
 }
 
@@ -130,7 +109,7 @@ export class IPeer<P extends IProtocol<any>> extends ICacheObject implements ILo
                     this.GetLogger().log(`outbound message`)
                     this.send(outbound)
                 }
-                //this.Send(JSON.stringify(outbound))
+
             }else{
                 this._cache.GetLogger().log(`message caught`)
             }
@@ -275,11 +254,3 @@ export abstract class IEndpoint extends ICacheObject{
         }
     }  
 }
-/*
-export abstract class IBinnedCacheObject extends ICacheObject{
-    //may or may not be unique
-    abstract TransformToIndex(): string
-    constructor(cache: ICache<any>){
-        super(cache)
-    }
-}*/

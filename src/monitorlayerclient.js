@@ -18,7 +18,6 @@ class DLMonitorLayerClient {
         return value;
     }
     initClient(ws) {
-        //ws.on('message', (msg) => {
         ws.addEventListener('message', (event) => {
             try {
                 let parsed = zodschemas_1.DLMonitorResponseZ.parse(JSON.parse(event.data));
