@@ -59,7 +59,7 @@ class DLayerNode extends stream_1.EventEmitter {
                 this.logger.log(`content hit: ${this.contentCache.Get([message.req.contentHash.hash])}`);
                 this.contentCache.Get([message.req.contentHash.hash]).then((e) => {
                     let rbb = new dlbuilder_1.DLQueryBuilder();
-                    rbb.setRes(e[0].GenerateResponse()).setMessage({}).setReq(message.req).setTicket(message.ticket);
+                    rbb.setRes(e[0].GenerateResponse()).setMessage({}).setReq(message.req).setTicket(message.ticket).setType(dlbuilder_1.QueryCodes.response);
                     this.logger.log(`rbb ${JSON.stringify(rbb._generateNoValidate(), null, 3)}`);
                     peer.Send(rbb);
                 });
@@ -67,9 +67,12 @@ class DLayerNode extends stream_1.EventEmitter {
             else {
                 this.logger.log(`no hit, peer query`);
                 try {
+                    this.logger.log(`what the hell`);
                     this.ticketCache.CreateTicket(peer, message.req, message.ticket, rb, (e) => {
-                        this.logger.log(`ticket created ${JSON.stringify(e, null, 2)}`);
-                        let qbb = new dlbuilder_1.DLQueryBuilder().from(message).setTicket(e.Get());
+                        this.logger.log(`whats happening`);
+                        //this.logger.log(`ticket created ${JSON.stringify(e, null, 2)}`)
+                        this.logger.log(`where are we`);
+                        let qbb = new dlbuilder_1.DLQueryBuilder().from(message).setTicket(e.GetTicket());
                         this.peerCache.QueryPeers(peer, qbb).catch((err) => {
                             if (err instanceof dlbuilder_1.DLNodeErrorBase) {
                                 let rbb = new dlbuilder_1.DLQueryBuilder();
@@ -80,6 +83,7 @@ class DLayerNode extends stream_1.EventEmitter {
                     });
                 }
                 catch (err) {
+                    this.logger.log(`dude`);
                     if (err instanceof dlbuilder_1.DLNodeErrorBase) {
                         let rbb = new dlbuilder_1.DLQueryBuilder();
                         this.handleDLNodeError(err, rbb);

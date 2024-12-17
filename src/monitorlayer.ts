@@ -46,12 +46,13 @@ export class DLMonitorLayer{
                             try{
                                 let query = DLRequestZ.parse(parsed.message!)
                                 this.dln.bowl.RequestContent(query.contentHash.hash, query.hops)
+                                console.log(`queried hash ${query.contentHash.hash}`)
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
                                         text: `queried hash ${query.contentHash.hash}`
                                     }
-                                }))
+                                }, null, 3))
                             }catch(err){
                                 console.log(err)
                                 ws.send(JSON.stringify({
@@ -59,7 +60,7 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
 
                             }
                             break
@@ -73,7 +74,7 @@ export class DLMonitorLayer{
                                     message: {
                                         text: `added content ${newCont}: ${rawCont.TransformToKey()}`
                                     }
-                                }))
+                                }, null, 3))
                             }catch(err){
                                 console.log(err)
                                 ws.send(JSON.stringify({
@@ -81,7 +82,7 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
 
                             }
                             break
@@ -97,7 +98,7 @@ export class DLMonitorLayer{
                                     message: {
                                         ...this.dln.getStat()
                                     }
-                                }))
+                                }, null, 3))
 
 
                             } catch(err) {
@@ -107,7 +108,7 @@ export class DLMonitorLayer{
                                     message: {
                                         error: '' + err
                                     }
-                                }))
+                                }, null, 3))
                             }
                             break
                     }
@@ -118,7 +119,7 @@ export class DLMonitorLayer{
                         message: {
                             error: '' + err
                         }
-                    }))
+                    }, null, 3))
 
                 }
 
@@ -142,8 +143,8 @@ export class DLMonitorLayer{
                 this.wss?.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "content",
-                        message: `${m}\n`
-                    }))
+                        message: m
+                    }, null, 3))
                 })
             })
             this.dln.logger.logHook((m) => {
@@ -151,8 +152,8 @@ export class DLMonitorLayer{
                 this.wss?.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "log",
-                        message: `${m}\n`
-                    }))
+                        message: `${m}`
+                    }, null, 3))
                 })
             })
             /*this.dln.contentHook((m) => {

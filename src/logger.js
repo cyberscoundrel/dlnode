@@ -5,6 +5,34 @@ class ILogging {
 }
 exports.ILogging = ILogging;
 class ILogger {
+    constructor() {
+        this._flairs = [
+            (options) => {
+                if ((options === null || options === void 0 ? void 0 : options.timestamp) === false) {
+                    return "";
+                }
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+                return `[${timeString}.${milliseconds}]`;
+            }
+            /*() => {
+                return "[INFO]"
+            },
+            () => {
+                return "[WARN]"
+            },
+            () => {
+                return "[ERROR]"
+            }*/
+        ];
+    }
+    log(m, options) {
+        let flair = this._flairs.reduce((acc, e) => {
+            return `${acc}${e(options)}`;
+        }, '');
+        this._logg(`${flair}${m}`);
+    }
 }
 exports.ILogger = ILogger;
 class StaticLogger extends ILogger {
@@ -21,7 +49,7 @@ class StaticLogger extends ILogger {
                 console.log(m);
             }];
     }
-    log(m) {
+    _logg(m) {
         this._logHooks.forEach((e, i) => {
             e(m);
         });
@@ -44,7 +72,7 @@ class DLNLogger extends ILogger {
             }];
         this._dln = dln;
     }
-    log(m) {
+    _logg(m) {
         this._logHooks.forEach((e, i) => {
             e(`[localhost:${this._dln.port}]${m}`);
         });
@@ -60,7 +88,7 @@ class PeerLogger extends ILogger {
         this._peer = peer;
         this._dlnLogger = dlnLogger;
     }
-    log(m) {
+    _logg(m) {
         this._dlnLogger.log(`[${this._peer._fields.host}]: ${m}`);
     }
     logHook(hook) {
@@ -74,7 +102,7 @@ class TicketLogger extends ILogger {
         this._ticket = ticket;
         this._dlnLogger = dlnLogger;
     }
-    log(m) {
+    _logg(m) {
         this._dlnLogger.log(`[${this._ticket._peer._fields.host}]: ${m}\n`);
     }
     logHook(hook) {

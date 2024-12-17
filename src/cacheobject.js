@@ -164,13 +164,18 @@ class LocalPeer extends IPeer {
     CreateRequest(cHash, hops) {
         return __awaiter(this, void 0, void 0, function* () {
             let qb = new dlbuilder_1.DLQueryBuilder();
-            let newTicket = yield this._dln.ticketCache.CreateTicket(this, {
+            let newTicket = this._dln.ticketCache.CreateTicket(this, {
                 contentHash: {
                     hash: cHash
                 },
                 hops: hops
             }, dlbuilder_1.DLQueryBuilder.NoTicket, qb);
-            this.GetLogger().log(`created ticket ${JSON.stringify(newTicket.GetTicket(), null, 2)}`);
+            this.GetLogger().log(`creating ticket ${JSON.stringify({
+                ticket: newTicket.GetTicket(),
+                request: newTicket.GetRequest(),
+                rhash: this._cache.GetHashAlg().Hash(newTicket.GetRequest()),
+                peer: this.GetHost()
+            }, null, 2)}`);
             return qb.setReq({
                 contentHash: {
                     hash: cHash

@@ -153,6 +153,7 @@ export class IPeerCache<A extends CacheAccessor<IPeer<any>>> extends ICache<IPee
         })
     }
     async QueryPeers(origin: IPeer<IProtocol<any>>, qb: DLQueryBuilder){
+        this.GetLogger().log(`querying peers for query ${JSON.stringify(qb.getReq(), null, 2)}`)
         this._queryPeers(origin, qb)
         //queries only active peers
         
@@ -293,6 +294,7 @@ export class ITicketCache<A extends CacheAccessor<Ticket>> extends ICache<Ticket
     CreateTicket(peer: IPeer<IProtocol<any>>, req: DLRequest, responseTicket: DLQueryTicket, rb: DLQueryBuilder, cb?: (tkt: Ticket) => void): Ticket{
         let newReq = { ...req}
         newReq.hops = 0
+        this._logger.log(`creating ticket for ${JSON.stringify({req: newReq, peerHost: peer.GetHost() }, null, 2)}`)
         let tc = new Ticket(this, peer, responseTicket, newReq)
         rb.setRes({
             status: ResponseCodes.ticket
@@ -300,15 +302,23 @@ export class ITicketCache<A extends CacheAccessor<Ticket>> extends ICache<Ticket
             text: "creating ticket"
         }).setType(QueryCodes.response).setReq(req).setTicket(tc.Get())
         
-        this._accessor._hasId(tc.TransformToKey()).then((v) => {
-            if(v){
+        this._accessor._getIds([tc.TransformToKey()]).then((v) => {
+            if(v.length > 0){
+                this._logger.log(`could not create ticket: ticket already exists`)
+                this._logger.log(`existing ticket: ${JSON.stringify({
+                    ticket: v[0].GetTicket(),
+                    request: v[0].GetRequest(),
+                    rhash: this.GetHashAlg().Hash(v[0].GetRequest()),
+                    host: v[0]._peer.GetHost()
+                }, null, 2)}`)
+                
                 throw new DLInternalError("could not create ticket: ticket already exists", "could not create ticket: ticket already exists", InternalError.ticketCreation)
             }
             else{
                 
-                this._createTicket(req, tc, rb, peer).then((v) => {
+                this._createTicket(req, tc, rb, peer).then((val) => {
                     if(cb){
-                        cb(v)
+                        cb(val)
                     }
                 }).catch((err) => {  
                     if(err instanceof DLInternalError) {
@@ -316,6 +326,12 @@ export class ITicketCache<A extends CacheAccessor<Ticket>> extends ICache<Ticket
                         peer.Send(rb)
                     }
                 })
+            }
+        }).catch((err) => {
+            this._logger.log(`could not create ticket: ${err}`)
+            if(err instanceof DLInternalError) {
+                err.buildError(rb)
+                peer.Send(rb)
             }
         })
 

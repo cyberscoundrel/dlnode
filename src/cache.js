@@ -185,6 +185,7 @@ class IPeerCache extends ICache {
     }
     QueryPeers(origin, qb) {
         return __awaiter(this, void 0, void 0, function* () {
+            this.GetLogger().log(`querying peers for query ${JSON.stringify(qb.getReq(), null, 2)}`);
             this._queryPeers(origin, qb);
             //queries only active peers
         });
@@ -315,20 +316,28 @@ class ITicketCache extends ICache {
     CreateTicket(peer, req, responseTicket, rb, cb) {
         let newReq = Object.assign({}, req);
         newReq.hops = 0;
+        this._logger.log(`creating ticket for ${JSON.stringify({ req: newReq, peerHost: peer.GetHost() }, null, 2)}`);
         let tc = new queryobjects_1.Ticket(this, peer, responseTicket, newReq);
         rb.setRes({
             status: dlbuilder_1.ResponseCodes.ticket
         }).setMessage({
             text: "creating ticket"
         }).setType(dlbuilder_1.QueryCodes.response).setReq(req).setTicket(tc.Get());
-        this._accessor._hasId(tc.TransformToKey()).then((v) => {
-            if (v) {
+        this._accessor._getIds([tc.TransformToKey()]).then((v) => {
+            if (v.length > 0) {
+                this._logger.log(`could not create ticket: ticket already exists`);
+                this._logger.log(`existing ticket: ${JSON.stringify({
+                    ticket: v[0].GetTicket(),
+                    request: v[0].GetRequest(),
+                    rhash: this.GetHashAlg().Hash(v[0].GetRequest()),
+                    host: v[0]._peer.GetHost()
+                }, null, 2)}`);
                 throw new dlbuilder_1.DLInternalError("could not create ticket: ticket already exists", "could not create ticket: ticket already exists", dlbuilder_1.InternalError.ticketCreation);
             }
             else {
-                this._createTicket(req, tc, rb, peer).then((v) => {
+                this._createTicket(req, tc, rb, peer).then((val) => {
                     if (cb) {
-                        cb(v);
+                        cb(val);
                     }
                 }).catch((err) => {
                     if (err instanceof dlbuilder_1.DLInternalError) {
@@ -336,6 +345,12 @@ class ITicketCache extends ICache {
                         peer.Send(rb);
                     }
                 });
+            }
+        }).catch((err) => {
+            this._logger.log(`could not create ticket: ${err}`);
+            if (err instanceof dlbuilder_1.DLInternalError) {
+                err.buildError(rb);
+                peer.Send(rb);
             }
         });
         return tc;

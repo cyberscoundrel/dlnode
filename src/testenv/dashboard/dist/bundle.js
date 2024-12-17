@@ -33049,43 +33049,40 @@ var InnerNode = function InnerNode(props) {
   console.log('node reload');
   //let oldNode = React.useRef<DLMonitorLayerClient>()
   //let [nodes, sideBarPops, setSideBarProps] = useOutletContext<[DLMonitorLayerClient[], NavType[], React.Dispatch<React.SetStateAction<NavType[]>>]>()
+  //let [log, setLog] = React.useState<string>('')
   var _React$useState = React.useState(''),
     _React$useState2 = _slicedToArray(_React$useState, 2),
-    log = _React$useState2[0],
-    setLog = _React$useState2[1];
+    content = _React$useState2[0],
+    setContent = _React$useState2[1];
   var _React$useState3 = React.useState(''),
     _React$useState4 = _slicedToArray(_React$useState3, 2),
-    content = _React$useState4[0],
-    setContent = _React$useState4[1];
-  var _React$useState5 = React.useState(''),
+    stat = _React$useState4[0],
+    setStat = _React$useState4[1];
+  var _React$useState5 = React.useState(),
     _React$useState6 = _slicedToArray(_React$useState5, 2),
-    stat = _React$useState6[0],
-    setStat = _React$useState6[1];
-  var _React$useState7 = React.useState(),
+    ostat = _React$useState6[0],
+    setOStat = _React$useState6[1];
+  var _React$useState7 = React.useState(''),
     _React$useState8 = _slicedToArray(_React$useState7, 2),
-    ostat = _React$useState8[0],
-    setOStat = _React$useState8[1];
+    newPeer = _React$useState8[0],
+    setNewPeer = _React$useState8[1];
   var _React$useState9 = React.useState(''),
     _React$useState10 = _slicedToArray(_React$useState9, 2),
-    newPeer = _React$useState10[0],
-    setNewPeer = _React$useState10[1];
-  var _React$useState11 = React.useState(''),
+    cont = _React$useState10[0],
+    setCont = _React$useState10[1];
+  var _React$useState11 = React.useState(),
     _React$useState12 = _slicedToArray(_React$useState11, 2),
-    cont = _React$useState12[0],
-    setCont = _React$useState12[1];
-  var _React$useState13 = React.useState(),
+    ocont = _React$useState12[0],
+    setOCont = _React$useState12[1];
+  var _React$useState13 = React.useState(''),
     _React$useState14 = _slicedToArray(_React$useState13, 2),
-    ocont = _React$useState14[0],
-    setOCont = _React$useState14[1];
-  var _React$useState15 = React.useState(''),
+    newCont = _React$useState14[0],
+    setNewCont = _React$useState14[1];
+  var _React$useState15 = React.useState([]),
     _React$useState16 = _slicedToArray(_React$useState15, 2),
-    newCont = _React$useState16[0],
-    setNewCont = _React$useState16[1];
-  var _React$useState17 = React.useState([]),
-    _React$useState18 = _slicedToArray(_React$useState17, 2),
-    contents = _React$useState18[0],
-    setContents = _React$useState18[1];
-  //console.log(`log ${log} stat ${stat}`)
+    contents = _React$useState16[0],
+    setContents = _React$useState16[1];
+  console.log("log ".concat(props.log, " stat ").concat(stat));
   /*props.node.handleContent = (m: any) => {
       setContent(content + JSON.stringify(m, null, 3))
   }
@@ -33117,14 +33114,24 @@ var InnerNode = function InnerNode(props) {
         return value;
       }
   }*/
+  var addToLog = function addToLog(m) {
+    console.log("logging from hook".concat('' + m));
+    console.log(props.log);
+    props.setLog(function (prevLog) {
+      return prevLog + '>' + m + '\n';
+    });
+    console.log(props.log);
+  };
   React.useEffect(function () {
     console.log('setting hooks');
     props.node.handleContent = function (m) {
-      setContent(content + JSON.stringify(m, null, 3).replace(/\n/g, "<br />"));
+      setContent(function (prevContent) {
+        return '>' + prevContent + JSON.stringify(m, null, 3) + '\n';
+      });
       setOCont(m);
     };
     props.node.handleLog = function (m) {
-      setLog(log + JSON.stringify(m, null, 3).replace(/\n/g, "<br />"));
+      addToLog(m);
     };
     props.node.handleStat = function (m) {
       //console.log('set stat')
@@ -33164,8 +33171,11 @@ var InnerNode = function InnerNode(props) {
     }
   };
   var requestCont = function requestCont() {
+    console.log("requestcont log is ".concat(props.log));
     if (cont != '') {
       var hsh = crypto_js_1["default"].SHA256(cont);
+      console.log("requesting ".concat(cont, "/").concat(hsh.toString()));
+      console.log("log is ".concat(props.log));
       props.node.socket.send(JSON.stringify({
         type: 'query',
         message: {
@@ -33219,7 +33229,7 @@ var InnerNode = function InnerNode(props) {
     if (ostat) {
       var ost = ostat;
       setStat(JSON.stringify(ostat, statreplacer, 3));
-      setLog(ost.log);
+      props.setLog(ost.log.replace(/^\[/gm, ">["));
       setCont(ost.content);
       //let ca: ContentType[] = []
       setContents(ost.contentCache.map(function (v, i) {
@@ -33290,7 +33300,7 @@ var InnerNode = function InnerNode(props) {
   }) : /*#__PURE__*/React.createElement(React.Fragment, null), /*#__PURE__*/React.createElement("button", {
     className: "p-4 mr-4 mt-4 rounded-md bg-slate-700 text-white justify-center",
     onClick: function onClick() {
-      setLog(log + 'logtest');
+      props.setLog(props.log + 'logtest');
     }
   }, "logtest"))), /*#__PURE__*/React.createElement(exports.TextArea, {
     icon: outline_1.InformationCircleIcon,
@@ -33299,7 +33309,7 @@ var InnerNode = function InnerNode(props) {
   }), /*#__PURE__*/React.createElement(exports.TextArea, {
     icon: outline_1.Bars3CenterLeftIcon,
     label: 'log',
-    content: log
+    content: props.log
   }), /*#__PURE__*/React.createElement(exports.TextArea, {
     icon: outline_1.CubeIcon,
     label: 'content',
@@ -33307,7 +33317,7 @@ var InnerNode = function InnerNode(props) {
   })));
 };
 var Node = function Node() {
-  console.log('node reload');
+  console.log('outer node reload');
   var _ref = (0, react_router_dom_1.useParams)(),
     nodeID = _ref.nodeID;
   //let oldID = React.useRef<string>(nodeID!)
@@ -33324,6 +33334,10 @@ var Node = function Node() {
   var nid = parseInt(nodeID);
   console.log("nid ".concat(nid));
   var node = nodes[nid];
+  var _React$useState17 = React.useState(''),
+    _React$useState18 = _slicedToArray(_React$useState17, 2),
+    log = _React$useState18[0],
+    setLog = _React$useState18[1];
   /*React.useEffect(() => {
       console.log(`oldstate ${oldID.current}`)
       console.log(`newstate ${nodeID}`)
@@ -33414,9 +33428,15 @@ var Node = function Node() {
       console.log('stat change')
       console.log(stat)
   }, [stat])*/
+  React.useEffect(function () {
+    console.log('why did log change');
+    console.log(log);
+  }, [log]);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(InnerNode, {
     node: node,
-    key: nid
+    key: nid,
+    log: log,
+    setLog: setLog
   }));
 };
 exports.Node = Node;
@@ -39217,7 +39237,7 @@ module.exports = axios;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("c4ebece386b659cb56b1")
+/******/ 		__webpack_require__.h = () => ("4aab0aed77f84c267893")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

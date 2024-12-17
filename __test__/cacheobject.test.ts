@@ -37,7 +37,7 @@ class MockLogger extends ILogger {
 
         
     }
-    log(m: any){
+    _logg(m: any){
         this._logHooks.forEach((e, i) => {
             e(`[mock logger]${m}`)
         })

@@ -12,13 +12,16 @@ const config = {
         labels: ['a', 'b', 'c', 'd', 'e'/*, 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l'*/],
         config: {
             'a': {
-                peers: ['b', 'e']
+                peers: ['b']
             },
             'b': {
-                peers: ['c', 'd']
+                peers: ['c']
+            },
+            'c': {
+                peers: ['d']
             },
             'd': {
-                peers: ['a']
+                peers: ['e']
             }
             /*'a': {
                 peers: ['b', 'c']

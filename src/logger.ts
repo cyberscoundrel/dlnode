@@ -9,7 +9,33 @@ export abstract class ILogging {
 }
 
 export abstract class ILogger {
-    abstract log(m: any): void
+    abstract _logg(m: any): void
+    _flairs: ((options?: unknown) => any)[] = [
+        (options?: unknown) => {
+            if((options as { timestamp?: boolean })?.timestamp === false){
+                return ""
+            }
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+            return `[${timeString}.${milliseconds}]`
+        }
+        /*() => {
+            return "[INFO]"
+        },
+        () => {
+            return "[WARN]"
+        },
+        () => {
+            return "[ERROR]"
+        }*/
+    ]
+    log(m: any, options?: unknown): void {
+        let flair = this._flairs.reduce((acc, e) => {
+            return `${acc}${e(options)}`
+        }, '')
+        this._logg(`${flair}${m}`)
+    }
     abstract logHook(hook: (m: any) => void): void
 }
 
@@ -30,7 +56,7 @@ export class StaticLogger extends ILogger {
             console.log(m)
         }]
     }
-    log(m: any){
+    _logg(m: any){
         this._logHooks.forEach((e, i) => {
             e(m)
         })
@@ -57,7 +83,7 @@ export class DLNLogger extends ILogger {
         this._dln = dln
         
     }
-    log(m: any){
+    _logg(m: any){
         this._logHooks.forEach((e, i) => {
             e(`[localhost:${this._dln.port}]${m}`)
         })
@@ -74,7 +100,7 @@ export class PeerLogger extends ILogger {
         this._peer = peer
         this._dlnLogger = dlnLogger
     }
-    log(m: any){
+    _logg(m: any){
         this._dlnLogger.log(`[${this._peer._fields.host}]: ${m}`)
     }
     logHook(hook: (m: any) => void){
@@ -89,7 +115,7 @@ export class TicketLogger extends ILogger {
         this._ticket = ticket
         this._dlnLogger = dlnLogger
     }
-    log(m: any){
+    _logg(m: any){
         this._dlnLogger.log(`[${this._ticket._peer._fields.host}]: ${m}\n`)
     }
     logHook(hook: (m: any) => void){

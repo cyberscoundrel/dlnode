@@ -51,7 +51,7 @@ export class RequestO{
 }*/
 class Ticket extends cacheobject_1.ICacheObject {
     TransformToKey() {
-        return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(this._fields._request));
+        return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(JSON.stringify(this._fields._request)));
         //return this._peer.TransformToKey()
     }
     /*TransformToIndex(): string {
@@ -71,6 +71,11 @@ class Ticket extends cacheobject_1.ICacheObject {
             _request: r,
             _peerId: peer.TransformToKey()
         };
+        this._fields._ticket = tc.txn != '000' ? tc :
+            {
+                txn: this.TransformToKey(),
+                recipient: this._fields._peerId
+            };
     }
     Get() {
         return this._fields._ticket;

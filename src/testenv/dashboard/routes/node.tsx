@@ -177,13 +177,15 @@ export const TextArea = (props: TextAreaPropType) => {
   
 type InnerNodePropType = {
     node: DLMonitorLayerClient
+    log: string
+    setLog: React.Dispatch<React.SetStateAction<string>>
 
 }
 const InnerNode = (props: InnerNodePropType) => {
     console.log('node reload')
     //let oldNode = React.useRef<DLMonitorLayerClient>()
     //let [nodes, sideBarPops, setSideBarProps] = useOutletContext<[DLMonitorLayerClient[], NavType[], React.Dispatch<React.SetStateAction<NavType[]>>]>()
-    let [log, setLog] = React.useState<string>('')
+    //let [log, setLog] = React.useState<string>('')
     let [content, setContent] = React.useState<string>('')
     let [stat, setStat] = React.useState<string>('')
     let [ostat, setOStat] = React.useState<unknown>()
@@ -193,7 +195,7 @@ const InnerNode = (props: InnerNodePropType) => {
     let [newCont, setNewCont] = React.useState<string>('')
     let [contents, setContents] = React.useState<ContentType[]>([])
     
-    //console.log(`log ${log} stat ${stat}`)
+    console.log(`log ${props.log} stat ${stat}`)
 
     /*props.node.handleContent = (m: any) => {
         setContent(content + JSON.stringify(m, null, 3))
@@ -226,15 +228,21 @@ const InnerNode = (props: InnerNodePropType) => {
           return value;
         }
     }*/
+   const addToLog = (m: any) => {
+        console.log(`logging from hook${('' + m)}`)
+        console.log(props.log)
+        props.setLog(prevLog => prevLog + '>' + m + '\n')
+        console.log(props.log)
+   }
    
     React.useEffect(() => {
         console.log('setting hooks')
         props.node.handleContent = (m: any) => {
-            setContent(content + JSON.stringify(m, null, 3).replace(/\n/g, "<br />"))
+            setContent(prevContent => '>' + prevContent + JSON.stringify(m, null, 3) + '\n')
             setOCont(m)
         }
         props.node.handleLog = (m: any) => {
-            setLog(log + JSON.stringify(m, null, 3).replace(/\n/g, "<br />"))
+            addToLog(m)
         }
         props.node.handleStat = (m: any) => {
             //console.log('set stat')
@@ -280,8 +288,11 @@ const InnerNode = (props: InnerNodePropType) => {
         }
     }
     const requestCont = () => {
+        console.log(`requestcont log is ${props.log}`)
         if(cont != '') {
         let hsh = CryptoJS.SHA256(cont)
+        console.log(`requesting ${cont}/${hsh.toString()}`)
+            console.log(`log is ${props.log}`)
             props.node.socket.send(JSON.stringify({
                 type: 'query',
                 message: {
@@ -342,7 +353,7 @@ const InnerNode = (props: InnerNodePropType) => {
                 contentCache: {key: string, value: string}[]
             }
             setStat(JSON.stringify(ostat, statreplacer, 3))
-            setLog(ost.log)
+            props.setLog(ost.log.replace(/^\[/gm, ">["))
             setCont(ost.content)
             //let ca: ContentType[] = []
             
@@ -392,17 +403,17 @@ const InnerNode = (props: InnerNodePropType) => {
             }}></input>
             {contents.length ? <ContentList content={contents}></ContentList> : <></>}
             <button className="p-4 mr-4 mt-4 rounded-md bg-slate-700 text-white justify-center" onClick={() => {
-                setLog(log + 'logtest')
+                props.setLog(props.log + 'logtest')
             }}>logtest</button></div></div>
             
             <TextArea icon={InformationCircleIcon} label={'stat'} content={stat}></TextArea>
-            <TextArea icon={Bars3CenterLeftIcon} label={'log'} content={log}></TextArea>
+            <TextArea icon={Bars3CenterLeftIcon} label={'log'} content={props.log}></TextArea>
             <TextArea icon={CubeIcon} label={'content'} content={content}></TextArea>
         </div></div>
     )
 }
 export const Node = () => {
-    console.log('node reload')
+    console.log('outer node reload')
     let { nodeID } = useParams()
     //let oldID = React.useRef<string>(nodeID!)
     
@@ -415,6 +426,7 @@ export const Node = () => {
     let nid = parseInt(nodeID!)
     console.log(`nid ${nid}`)
     let node = nodes[nid]
+    let [log, setLog] = React.useState<string>('')
     /*React.useEffect(() => {
         console.log(`oldstate ${oldID.current}`)
         console.log(`newstate ${nodeID}`)
@@ -509,10 +521,14 @@ export const Node = () => {
         console.log('stat change')
         console.log(stat)
     }, [stat])*/
+    React.useEffect(() => {
+      console.log('why did log change')
+      console.log(log)
+    }, [log])
 
     return (
         <div>
-            <InnerNode node={node} key={nid} />            
+            <InnerNode node={node} key={nid} log={log} setLog={setLog}/>            
         </div>
     )
 }

@@ -41,12 +41,13 @@ class DLMonitorLayer {
                             try {
                                 let query = zodschemas_1.DLRequestZ.parse(parsed.message);
                                 this.dln.bowl.RequestContent(query.contentHash.hash, query.hops);
+                                console.log(`queried hash ${query.contentHash.hash}`);
                                 ws.send(JSON.stringify({
                                     type: "log",
                                     message: {
                                         text: `queried hash ${query.contentHash.hash}`
                                     }
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -55,7 +56,7 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                         case "addCont":
@@ -67,7 +68,7 @@ class DLMonitorLayer {
                                     message: {
                                         text: `added content ${newCont}: ${rawCont.TransformToKey()}`
                                     }
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -76,7 +77,7 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                         case "addPeers":
@@ -88,7 +89,7 @@ class DLMonitorLayer {
                                 ws.send(JSON.stringify({
                                     type: "stat",
                                     message: Object.assign({}, this.dln.getStat())
-                                }));
+                                }, null, 3));
                             }
                             catch (err) {
                                 console.log(err);
@@ -97,7 +98,7 @@ class DLMonitorLayer {
                                     message: {
                                         error: '' + err
                                     }
-                                }));
+                                }, null, 3));
                             }
                             break;
                     }
@@ -109,7 +110,7 @@ class DLMonitorLayer {
                         message: {
                             error: '' + err
                         }
-                    }));
+                    }, null, 3));
                 }
             });
         });
@@ -132,8 +133,8 @@ class DLMonitorLayer {
                 (_a = this.wss) === null || _a === void 0 ? void 0 : _a.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "content",
-                        message: `${m}\n`
-                    }));
+                        message: m
+                    }, null, 3));
                 });
             });
             this.dln.logger.logHook((m) => {
@@ -142,8 +143,8 @@ class DLMonitorLayer {
                 (_a = this.wss) === null || _a === void 0 ? void 0 : _a.clients.forEach((e, i) => {
                     e.send(JSON.stringify({
                         type: "log",
-                        message: `${m}\n`
-                    }));
+                        message: `${m}`
+                    }, null, 3));
                 });
             });
             /*this.dln.contentHook((m) => {

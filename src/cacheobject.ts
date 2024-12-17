@@ -181,13 +181,18 @@ export class LocalPeer extends IPeer<LocalProtocol> {
     }
     async CreateRequest(cHash: string, hops: number): Promise<DLQueryBuilder>{
         let qb: DLQueryBuilder = new DLQueryBuilder()
-        let newTicket = await this._dln.ticketCache.CreateTicket(this, {
+        let newTicket = this._dln.ticketCache.CreateTicket(this, {
             contentHash: {
                 hash: cHash
             },
             hops: hops
         }, DLQueryBuilder.NoTicket, qb)
-        this.GetLogger().log(`created ticket ${JSON.stringify(newTicket.GetTicket(), null, 2)}`)
+        this.GetLogger().log(`creating ticket ${JSON.stringify({
+            ticket: newTicket.GetTicket(),
+            request: newTicket.GetRequest(),
+            rhash: this._cache.GetHashAlg().Hash(newTicket.GetRequest()),
+            peer: this.GetHost()
+         }, null, 2)}`)
         return qb.setReq({
             contentHash: {
                 hash: cHash

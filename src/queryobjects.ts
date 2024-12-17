@@ -67,7 +67,7 @@ export class Ticket extends ICacheObject{
         
     }
     TransformToKey(): string {
-        return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(this._fields._request))
+        return this._cache.GetHashAlg().Hash(this._peer.TransformToKey() + this._cache.GetHashAlg().Hash(JSON.stringify(this._fields._request)))
         //return this._peer.TransformToKey()
     }
     /*TransformToIndex(): string {
@@ -85,6 +85,11 @@ export class Ticket extends ICacheObject{
             _request: r,
             _peerId: peer.TransformToKey()
         }
+        this._fields._ticket = tc.txn! != '000' ? tc :
+        {
+            txn: this.TransformToKey(),
+            recipient: this._fields._peerId
+        } 
     }
     Get(): DLQueryTicket {
         return this._fields._ticket as DLQueryTicket
